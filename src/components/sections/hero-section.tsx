@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowDown, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { heroData } from '@/lib/data';
+import { LampContainer } from '@/components/ui/lamp';
 
 const AnimatedTyping = () => {
     const [text, setText] = useState('');
@@ -47,37 +48,34 @@ export function HeroSection() {
         document.querySelector('#projects')?.scrollIntoView({ behavior: 'smooth' });
     }
   return (
-    <section id="home" className="h-screen flex items-center justify-center text-center">
-      <div className="relative z-10">
-        <motion.h1 
-          className="text-4xl sm:text-6xl md:text-7xl font-headline font-bold tracking-tighter"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+    <LampContainer id="home">
+      <motion.div
+        initial={{ opacity: 0.5, y: 100 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{
+          delay: 0.3,
+          duration: 0.8,
+          ease: "easeInOut",
+        }}
+        className="text-center"
+      >
+        <h1 
+          className="bg-gradient-to-br from-slate-300 to-slate-500 py-4 bg-clip-text text-center text-4xl font-medium tracking-tight text-transparent md:text-7xl font-headline"
         >
           {heroData.name}
-        </motion.h1>
-        <motion.p 
+        </h1>
+        <p 
           className="mt-4 text-lg md:text-2xl text-muted-foreground font-medium"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
         >
           {heroData.title}
-        </motion.p>
-        <motion.div
+        </p>
+        <div
             className="mt-6 text-base md:text-xl text-primary font-mono h-8"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
         >
             <AnimatedTyping />
-        </motion.div>
-        <motion.div 
+        </div>
+        <div 
             className="mt-8 flex flex-col sm:flex-row gap-4 justify-center"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
         >
             <Button size="lg" onClick={scrollToProjects}>
                 View Projects
@@ -89,8 +87,8 @@ export function HeroSection() {
                     <Download className="ml-2 h-5 w-5" />
                 </a>
             </Button>
-        </motion.div>
-      </div>
-    </section>
+        </div>
+      </motion.div>
+    </LampContainer>
   );
 }
