@@ -38,7 +38,7 @@ export const achievements = [
     { label: "Students Mentored", value: 40 },
     { label: "Performance Improvement", value: 85 },
     { label: "Monthly Active Users", value: 1000 },
-    { label: "Sponsorships Secured", value: 5000 },
+    { label: "Sponsorships Secured", value: 100000 },
 ];
 
 export const skills = [
@@ -207,7 +207,7 @@ export const leadershipAndAchievements = [
       description: 'Led a team to organize events, manage public relations, and enhance student engagement across the campus.',
     },
     {
-      title: 'Organized a 24-hour hackathon',
+      title: 'Organized a 24-hour hackathon twice',
       description: 'Successfully managed a major tech event with over 200 participants, fostering innovation and collaboration.',
     },
     {
