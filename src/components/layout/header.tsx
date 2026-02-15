@@ -34,7 +34,7 @@ const DockItem = ({ mouseX, link }: { mouseX: any, link: typeof navLinks[0] }) =
   });
 
   // Adjust the range and magnification for a better feel
-  const widthSync = useTransform(distance, [-120, 0, 120], [48, 80, 48]);
+  const widthSync = useTransform(distance, [-150, 0, 150], [56, 96, 56]);
   // Tweak spring settings for less lag
   const width = useSpring(widthSync, {
     mass: 0.1,
@@ -53,7 +53,7 @@ const DockItem = ({ mouseX, link }: { mouseX: any, link: typeof navLinks[0] }) =
           className="flex aspect-square items-center justify-center rounded-full text-muted-foreground transition-colors duration-300 hover:bg-primary/10 hover:text-primary"
           aria-label={link.label}
         >
-          {Icon && <Icon className="h-6 w-6" />}
+          {Icon && <Icon className="h-7 w-7" />}
         </motion.a>
       </TooltipTrigger>
       <TooltipContent>
@@ -66,7 +66,7 @@ const DockItem = ({ mouseX, link }: { mouseX: any, link: typeof navLinks[0] }) =
 
 const MobileDock = () => {
     return (
-        <nav className="flex items-end h-16 gap-2 rounded-full border border-primary/10 bg-card/50 p-2 shadow-lg backdrop-blur-lg">
+        <nav className="flex items-end h-20 gap-2 rounded-full border border-primary/10 bg-card/50 p-2 shadow-lg backdrop-blur-lg">
             {navLinks.map((link) => {
                 const Icon = iconMap[link.label];
                 return (
@@ -75,10 +75,10 @@ const MobileDock = () => {
                         <a
                             href={link.href}
                             onClick={(e) => handleLinkClick(e, link.href)}
-                            className="flex h-12 w-12 items-center justify-center rounded-full text-muted-foreground transition-all duration-300 hover:bg-primary/10 hover:text-primary"
+                            className="flex h-14 w-14 items-center justify-center rounded-full text-muted-foreground transition-all duration-300 hover:bg-primary/10 hover:text-primary"
                             aria-label={link.label}
                         >
-                            {Icon && <Icon className="h-6 w-6" />}
+                            {Icon && <Icon className="h-7 w-7" />}
                         </a>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -120,7 +120,7 @@ export function Header() {
         <motion.nav 
           onMouseMove={(e) => mouseX.set(e.pageX)}
           onMouseLeave={() => mouseX.set(Infinity)}
-          className="flex items-end h-16 gap-2 rounded-full border border-primary/10 bg-card/50 p-2 shadow-lg backdrop-blur-lg"
+          className="flex items-end h-20 gap-2 rounded-full border border-primary/10 bg-card/50 p-2 shadow-lg backdrop-blur-lg"
         >
           {navLinks.map((link) => (
             <DockItem key={link.href} mouseX={mouseX} link={link} />
