@@ -11,7 +11,7 @@ import { ContactSection } from '@/components/sections/contact-section';
 
 export default function Home() {
   return (
-    <div className="bg-background text-foreground">
+    <div className="text-foreground">
       <Header />
       <main className="flex flex-col items-center">
         <HeroSection />
