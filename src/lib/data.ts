@@ -185,6 +185,19 @@ export const projects = [
             live: "#",
             github: "#"
         }
+    },
+    {
+        id: "mana-sambaralu",
+        name: "MANA SAMBARALU",
+        description: "A client app for more than 50 Telugu festivals, built with FastAPI and Streamlit and deployed on Streamlit.",
+        stats: [
+            { value: "50+", label: "Festivals Covered" }
+        ],
+        tech: ["FastAPI", "Streamlit", "Python"],
+        links: {
+            live: "#",
+            github: "#"
+        }
     }
 ];
 
