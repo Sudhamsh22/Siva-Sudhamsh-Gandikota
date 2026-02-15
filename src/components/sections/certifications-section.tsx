@@ -54,7 +54,6 @@ export function CertificationsSection() {
                 </div>
                 <h3 className="font-bold text-lg text-primary-foreground">{cert.name}</h3>
                 <p className="text-muted-foreground text-sm mt-1">{cert.issuer}</p>
-                <p className="text-sm text-muted-foreground mt-2">{cert.date}</p>
               </CardContent>
             </Card>
           </motion.div>

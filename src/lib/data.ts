@@ -225,9 +225,9 @@ export const leadershipAndAchievements = [
 ];
 
 export const certifications = [
-    { name: 'Oracle AI Vector Search', issuer: 'Oracle', date: '2024' },
-    { name: 'Microsoft Azure Fundamentals (AZ-900)', issuer: 'Microsoft', date: '2023' },
-    { name: 'AI & Big Data', issuer: 'IEEE', date: '2023' },
+    { name: 'Oracle AI Vector Search', issuer: 'Oracle' },
+    { name: 'Microsoft Azure Fundamentals (AZ-900)', issuer: 'Microsoft' },
+    { name: 'AI & Big Data', issuer: 'IEEE' },
 ];
 
 export const socialLinks = {
