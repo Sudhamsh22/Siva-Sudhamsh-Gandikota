@@ -15,8 +15,8 @@
     {
       "id": "siva-avatar",
       "description": "Avatar for Siva Sudhamsh Gandikota",
-      "imageUrl": "https://images.unsplash.com/photo-1594672830234-ba4cfe1202dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWFuJTIwcG9ydHJhaXR8ZW58MHx8fHwxNzcxMTM3NTg3fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      "imageHint": "man portrait"
+      "imageUrl": "https://storage.googleapis.com/aif-studiobot-images/3e143896-1c4b-4f81-a75d-6c17d7b901a5.jpeg",
+      "imageHint": "man sunglasses"
     }
   ]
 }
