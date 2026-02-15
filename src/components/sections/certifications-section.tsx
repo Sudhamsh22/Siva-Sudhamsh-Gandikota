@@ -52,7 +52,7 @@ export function CertificationsSection() {
                     <BadgeCheck className="w-12 h-12 text-primary" />
                   </div>
                 </div>
-                <h3 className="font-bold text-lg text-primary-foreground">{cert.name}</h3>
+                <h3 className="font-bold text-lg text-foreground">{cert.name}</h3>
                 <p className="text-muted-foreground text-sm mt-1">{cert.issuer}</p>
               </CardContent>
             </Card>
