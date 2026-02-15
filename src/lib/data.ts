@@ -146,6 +146,19 @@ export const projects = [
             live: "#",
             github: "#"
         }
+    },
+    {
+        id: "ybs-industries",
+        name: "YBS Industries Landing page",
+        description: "Landing page for YBS Industries a software company of hyderabad with attractive UI. Improved client satisfaction.",
+        stats: [
+            { value: "High", label: "Client Satisfaction" }
+        ],
+        tech: ["React", "Next.js", "Tailwind CSS"],
+        links: {
+            live: "#",
+            github: "#"
+        }
     }
 ];
 

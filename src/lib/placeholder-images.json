@@ -17,6 +17,12 @@
       "description": "Avatar for Siva Sudhamsh Gandikota",
       "imageUrl": "https://storage.googleapis.com/aif-studiobot-images/e8c8a1e2-045e-4f0f-851f-508933b93478.jpeg",
       "imageHint": "man sunglasses"
+    },
+    {
+      "id": "ybs-industries",
+      "description": "Landing page for YBS Industries.",
+      "imageUrl": "https://storage.googleapis.com/aif-studiobot-images/61a34989-6d5f-4f24-9b37-975949641773.png",
+      "imageHint": "tech website"
     }
   ]
 }
