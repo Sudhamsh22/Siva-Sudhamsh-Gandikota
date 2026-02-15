@@ -47,7 +47,7 @@ export function HeroSection() {
         document.querySelector('#projects')?.scrollIntoView({ behavior: 'smooth' });
     }
   return (
-    <section id="home" className="flex min-h-screen flex-col items-center justify-center w-full">
+    <section id="home" className="flex min-h-screen flex-col items-center justify-center w-full px-4">
       <motion.div
         initial={{ opacity: 0, y: 100 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -56,15 +56,15 @@ export function HeroSection() {
           duration: 0.8,
           ease: "easeInOut",
         }}
-        className="text-center"
+        className="text-center glass-card p-8 md:p-12"
       >
         <h1 
-          className="bg-gradient-to-br from-slate-200 to-slate-400 py-4 bg-clip-text text-center text-4xl font-medium tracking-tight text-transparent md:text-7xl font-headline"
+          className="bg-gradient-to-br from-slate-50 to-slate-300 py-4 bg-clip-text text-center text-4xl font-medium tracking-tight text-transparent md:text-7xl font-headline"
         >
           {heroData.name}
         </h1>
         <p 
-          className="mt-4 text-lg md:text-2xl text-foreground/80 font-medium"
+          className="mt-4 text-lg md:text-2xl text-foreground font-medium"
         >
           {heroData.title}
         </p>
