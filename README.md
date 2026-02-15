@@ -1,5 +1,6 @@
-# Firebase Studio
-
-This is a NextJS starter in Firebase Studio.
-
-To get started, take a look at src/app/page.tsx.
+#Step 1
+Cd Clone [https](https://github.com/Sudhamsh22/Siva-Sudhamsh-Gandikoata.git)
+#Step 2
+npm i
+#step 3
+npm run dev
