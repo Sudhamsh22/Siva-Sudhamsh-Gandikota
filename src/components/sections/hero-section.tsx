@@ -49,7 +49,7 @@ export function HeroSection() {
   return (
     <section id="home" className="flex min-h-screen flex-col items-center justify-center w-full">
       <motion.div
-        initial={{ opacity: 0.5, y: 100 }}
+        initial={{ opacity: 0, y: 100 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{
           delay: 0.3,
@@ -59,12 +59,12 @@ export function HeroSection() {
         className="text-center"
       >
         <h1 
-          className="bg-gradient-to-br from-slate-300 to-slate-500 py-4 bg-clip-text text-center text-4xl font-medium tracking-tight text-transparent md:text-7xl font-headline"
+          className="bg-gradient-to-br from-slate-200 to-slate-400 py-4 bg-clip-text text-center text-4xl font-medium tracking-tight text-transparent md:text-7xl font-headline"
         >
           {heroData.name}
         </h1>
         <p 
-          className="mt-4 text-lg md:text-2xl text-muted-foreground font-medium"
+          className="mt-4 text-lg md:text-2xl text-foreground/80 font-medium"
         >
           {heroData.title}
         </p>
