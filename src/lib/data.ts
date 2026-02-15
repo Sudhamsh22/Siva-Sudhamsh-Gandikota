@@ -172,6 +172,19 @@ export const projects = [
             live: "#",
             github: "#"
         }
+    },
+    {
+        id: "govconnect",
+        name: "GovConnect - Interdepartmental cooperation System",
+        description: "GovConnect is a website which helps users to access all government services in a single platform and all indian government departments to communicate with each other. Made with react for frontend connecting more than 20 Government services and Mongo Db for database.",
+        stats: [
+            { value: "20+", label: "Services Connected" }
+        ],
+        tech: ["React", "MongoDB", "Node.js"],
+        links: {
+            live: "#",
+            github: "#"
+        }
     }
 ];
 

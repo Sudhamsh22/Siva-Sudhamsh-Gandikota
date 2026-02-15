@@ -29,6 +29,12 @@
       "description": "Landing page for Samardhya.",
       "imageUrl": "https://image2url.com/r2/default/images/1771176409302-5e170b87-573b-4597-9596-83356cedea85.png",
       "imageHint": "skills platform"
+    },
+    {
+      "id": "govconnect",
+      "description": "An interdepartmental cooperation system for government services.",
+      "imageUrl": "https://image2url.com/r2/default/images/1771177194229-51d9d513-cdbc-441c-be9f-f384b73dba98.png",
+      "imageHint": "government platform"
     }
   ]
 }
