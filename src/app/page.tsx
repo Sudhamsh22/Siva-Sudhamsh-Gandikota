@@ -8,14 +8,12 @@ import { ProjectsSection } from '@/components/sections/projects-section';
 import { AchievementsSection } from '@/components/sections/achievements-section';
 import { CertificationsSection } from '@/components/sections/certifications-section';
 import { ContactSection } from '@/components/sections/contact-section';
-import { AnimatedBackground } from '@/components/ui/animated-background';
 
 export default function Home() {
   return (
     <div className="bg-background text-foreground">
-      <AnimatedBackground />
       <Header />
-      <main className="relative z-10 flex flex-col items-center">
+      <main className="relative z-0 flex flex-col items-center">
         <HeroSection />
         <AboutSection />
         <SkillsSection />

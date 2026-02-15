@@ -75,6 +75,7 @@ export const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({
     };
 
     const draw = () => {
+      if (!ctx) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       particles.forEach((p, i) => {
@@ -138,5 +139,5 @@ export const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({
     };
   }, [particleCount, maxDistance]);
 
-  return <canvas ref={canvasRef} className={cn('fixed top-0 left-0 w-full h-full -z-10', className)} />;
+  return null;
 };
