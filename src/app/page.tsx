@@ -1,3 +1,31 @@
+import { Header } from '@/components/layout/header';
+import { Footer } from '@/components/layout/footer';
+import { HeroSection } from '@/components/sections/hero-section';
+import { AboutSection } from '@/components/sections/about-section';
+import { SkillsSection } from '@/components/sections/skills-section';
+import { ExperienceSection } from '@/components/sections/experience-section';
+import { ProjectsSection } from '@/components/sections/projects-section';
+import { AchievementsSection } from '@/components/sections/achievements-section';
+import { CertificationsSection } from '@/components/sections/certifications-section';
+import { ContactSection } from '@/components/sections/contact-section';
+import { AnimatedBackground } from '@/components/ui/animated-background';
+
 export default function Home() {
-  return <></>;
+  return (
+    <div className="bg-background text-foreground">
+      <AnimatedBackground />
+      <Header />
+      <main className="relative z-10 flex flex-col items-center">
+        <HeroSection />
+        <AboutSection />
+        <SkillsSection />
+        <ExperienceSection />
+        <ProjectsSection />
+        <AchievementsSection />
+        <CertificationsSection />
+        <ContactSection />
+      </main>
+      <Footer />
+    </div>
+  );
 }
