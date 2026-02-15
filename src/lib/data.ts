@@ -21,7 +21,13 @@ export const heroData = {
 };
 
 export const aboutData = {
-    summary: "Computer Science student (AI specialization) with hands-on experience in machine learning and full-stack development. Fine-tuned ML models achieving 92% accuracy at Vishwam AI internship while building production applications serving 500+ concurrent users for freelance clients. Proficient in RESTful microservices (FastAPI, Node.js), computer vision (YOLO), and deploying scalable systems. Passionate about applying AI to solve real-world problems.",
+    summary: "Computer Science student (AI specialization) with hands-on experience in machine learning and full-stack development. Passionate about applying AI to solve real-world problems, I have a proven track record of:",
+    bulletPoints: [
+        "Fine-tuning ML models to achieve 92% accuracy.",
+        "Building production applications serving 500+ concurrent users.",
+        "Developing with RESTful microservices (FastAPI, Node.js) and computer vision (YOLO).",
+        "Deploying scalable systems from development to production."
+    ],
     specializations: [],
     conclusion: ""
 };

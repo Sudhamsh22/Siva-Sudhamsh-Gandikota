@@ -6,7 +6,7 @@ import { motion, useInView } from 'framer-motion';
 import { aboutData, achievements } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent } from '@/components/ui/card';
-import { Target, Zap, Users, ShieldCheck } from 'lucide-react';
+import { Target, Zap, Users, ShieldCheck, CheckCircle } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const iconMap = {
@@ -69,6 +69,14 @@ export function AboutSection() {
           <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
             {aboutData.summary}
           </p>
+          <ul className="mt-6 space-y-4">
+            {(aboutData.bulletPoints as string[]).map((point, index) => (
+              <li key={index} className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                <span className="text-muted-foreground">{point}</span>
+              </li>
+            ))}
+          </ul>
         </motion.div>
         <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
