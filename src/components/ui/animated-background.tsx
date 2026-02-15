@@ -912,6 +912,46 @@ export function AnimatedBackground() {
             composer.render();
         }
 
+        const handleThemeChange = (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            updateTheme(detail);
+            if (themeButtonsRef.current) {
+                themeButtonsRef.current.querySelectorAll('.theme-button').forEach(b => b.classList.remove('active'));
+                themeButtonsRef.current.querySelector(`.theme-button[data-theme="${detail}"]`)?.classList.add('active');
+            }
+        };
+
+        const handleDensityChange = (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            config.densityFactor = detail;
+            createNetworkVisualization(config.currentFormation, config.densityFactor);
+        };
+
+        const handleMorph = () => {
+            config.currentFormation = (config.currentFormation + 1) % config.numFormations;
+            createNetworkVisualization(config.currentFormation, config.densityFactor);
+            controls.autoRotate = false;
+            setTimeout(() => { controls.autoRotate = true; }, 2500);
+        };
+        
+        const handlePausePlay = () => {
+            config.paused = !config.paused;
+            controls.autoRotate = !config.paused;
+        };
+        
+        const handleReset = () => {
+            controls.reset();
+            controls.autoRotate = false;
+            setTimeout(() => { controls.autoRotate = true; }, 2000);
+        };
+
+        window.addEventListener('theme-change', handleThemeChange);
+        window.addEventListener('density-change', handleDensityChange);
+        window.addEventListener('morph', handleMorph);
+        window.addEventListener('pause-play', handlePausePlay);
+        window.addEventListener('reset-camera', handleReset);
+
+
         function init() {
             createNetworkVisualization(config.currentFormation, config.densityFactor);
             if(themeButtonsRef.current) {
@@ -937,15 +977,21 @@ export function AnimatedBackground() {
             window.removeEventListener('resize', onWindowResize);
             renderer.domElement.removeEventListener('click', handleCanvasClick);
             renderer.domElement.removeEventListener('touchstart', handleCanvasClick);
+
+            window.removeEventListener('theme-change', handleThemeChange);
+            window.removeEventListener('density-change', handleDensityChange);
+            window.removeEventListener('morph', handleMorph);
+            window.removeEventListener('pause-play', handlePausePlay);
+            window.removeEventListener('reset-camera', handleReset);
+
             cancelAnimationFrame(animationFrameId);
-            // Dispose Three.js objects
             scene.traverse(object => {
                 if (object instanceof THREE.Mesh || object instanceof THREE.Points || object instanceof THREE.LineSegments) {
                     object.geometry.dispose();
                     if(Array.isArray(object.material)) {
                         object.material.forEach(material => material.dispose());
-                    } else {
-                        object.material.dispose();
+                    } else if (object.material) {
+                        (object.material as THREE.Material).dispose();
                     }
                 }
             });
@@ -955,9 +1001,7 @@ export function AnimatedBackground() {
     }, []);
 
     const handleThemeChange = (themeIndex: number) => {
-        // The logic is inside the useEffect, we just need to trigger it
-        const event = new CustomEvent('theme-change', { detail: themeIndex });
-        window.dispatchEvent(event);
+        window.dispatchEvent(new CustomEvent('theme-change', { detail: themeIndex }));
         setActiveTheme(themeIndex);
     };
 
@@ -970,25 +1014,21 @@ export function AnimatedBackground() {
         }
         clearTimeout(densityTimeout);
         densityTimeout = setTimeout(() => {
-            const event = new CustomEvent('density-change', { detail: val / 100 });
-            window.dispatchEvent(event);
+            window.dispatchEvent(new CustomEvent('density-change', { detail: val / 100 }));
         }, 400);
     };
     
     const handleMorph = () => {
-        const event = new CustomEvent('morph');
-        window.dispatchEvent(event);
+        window.dispatchEvent(new CustomEvent('morph'));
     };
     
     const handlePausePlay = () => {
         setIsPaused(p => !p);
-        const event = new CustomEvent('pause-play');
-        window.dispatchEvent(event);
+        window.dispatchEvent(new CustomEvent('pause-play'));
     };
     
     const handleReset = () => {
-        const event = new CustomEvent('reset-camera');
-        window.dispatchEvent(event);
+        window.dispatchEvent(new CustomEvent('reset-camera'));
     };
 
     return (
