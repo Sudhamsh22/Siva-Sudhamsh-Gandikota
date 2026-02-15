@@ -159,6 +159,19 @@ export const projects = [
             live: "#",
             github: "#"
         }
+    },
+    {
+        id: "samardhya-landing-page",
+        name: "SAMARDHYA - LANDING PAGE",
+        description: "Samardhya is platform for knowing ones skill and what they are good at. Made with react and TailwindCSS. It is a Client project",
+        stats: [
+            { value: "High", label: "Client Satisfaction" }
+        ],
+        tech: ["React", "Tailwind CSS"],
+        links: {
+            live: "#",
+            github: "#"
+        }
     }
 ];
 

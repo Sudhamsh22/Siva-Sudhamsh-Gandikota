@@ -23,6 +23,12 @@
       "description": "Landing page for YBS Industries.",
       "imageUrl": "https://image2url.com/r2/default/images/1771171227409-99991e73-5173-4f4e-b8ce-e447923127f4.png",
       "imageHint": "tech website"
+    },
+    {
+      "id": "samardhya-landing-page",
+      "description": "Landing page for Samardhya.",
+      "imageUrl": "https://image2url.com/r2/default/images/1771176409302-5e170b87-573b-4597-9596-83356cedea85.png",
+      "imageHint": "skills platform"
     }
   ]
 }
