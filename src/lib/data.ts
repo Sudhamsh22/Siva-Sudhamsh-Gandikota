@@ -129,8 +129,8 @@ export const projects = [
         ],
         tech: ["Next.js", "FastAPI", "YOLO", "Docker", "AWS"],
         links: {
-            live: "#",
-            github: "#"
+            live: "https://frontend-1-2yx1.vercel.app/",
+            github: "https://github.com/Sudhamsh22/AutoTuning.AI.git"
         }
     },
     {
@@ -143,8 +143,8 @@ export const projects = [
         ],
         tech: ["React", "Node.js", "WebSockets", "MongoDB"],
         links: {
-            live: "#",
-            github: "#"
+            live: "https://www.klradio.in/",
+            github: "https://github.com/Bhanutejanallamothu/Klradio.git"
         }
     },
     {
@@ -156,8 +156,8 @@ export const projects = [
         ],
         tech: ["React", "Next.js", "Tailwind CSS"],
         links: {
-            live: "#",
-            github: "#"
+            live: "https://www.ybsindustriesllp.com/",
+            github: "https://github.com/Sudhamsh22/YBS.git"
         }
     },
     {
@@ -169,8 +169,8 @@ export const projects = [
         ],
         tech: ["React", "Tailwind CSS"],
         links: {
-            live: "#",
-            github: "#"
+            live: "https://samardhya-landing-page-19qaueaz8.vercel.app/",
+            github: "https://github.com/Sudhamsh22/Samardhya_Landing-page.git"
         }
     },
     {
@@ -182,8 +182,8 @@ export const projects = [
         ],
         tech: ["React", "MongoDB", "Node.js"],
         links: {
-            live: "#",
-            github: "#"
+            live: "https://gov-connect-hzqraa4uv-sivasudhamsh2005-3889s-projects.vercel.app/",
+            github: "https://github.com/Sudhamsh22/Gov-Connect.git"
         }
     },
     {
@@ -195,8 +195,8 @@ export const projects = [
         ],
         tech: ["FastAPI", "Streamlit", "Python"],
         links: {
-            live: "#",
-            github: "#"
+            live: "https://github.com/Sudhamsh22/mana-sambharalu.git",
+            github: "https://github.com/Sudhamsh22/mana-sambharalu.git"
         }
     }
 ];
