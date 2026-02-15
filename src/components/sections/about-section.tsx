@@ -61,6 +61,7 @@ export function AboutSection() {
     <section id="about" ref={ref}>
       <div className="grid md:grid-cols-2 gap-12 items-center">
         <motion.div
+          className="glass-card p-8"
           initial={{ opacity: 0, x: -50 }}
           animate={isInView ? { opacity: 1, x: 0 } : {}}
           transition={{ duration: 0.7 }}
