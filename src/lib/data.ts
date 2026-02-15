@@ -21,14 +21,9 @@ export const heroData = {
 };
 
 export const aboutData = {
-    summary: "Hi, I'm Siva — a Software Engineer passionate about AI-powered applications and scalable backend systems.",
-    specializations: [
-        "Fine-tuning machine learning models with 92% accuracy",
-        "Building high-performance APIs handling 5K+ daily requests",
-        "Deploying production systems with 99.8% uptime",
-        "Integrating computer vision (YOLO) for real-time applications"
-    ],
-    conclusion: "Currently working as an AI Engineering Intern at Vishwam AI and delivering freelance projects for SaaS clients. When I'm not coding, I mentor students through technical workshops and lead hackathons."
+    summary: "Computer Science student (AI specialization) with hands-on experience in machine learning and full-stack development. Fine-tuned ML models achieving 92% accuracy at Vishwam AI internship while building production applications serving 500+ concurrent users for freelance clients. Proficient in RESTful microservices (FastAPI, Node.js), computer vision (YOLO), and deploying scalable systems. Passionate about applying AI to solve real-world problems.",
+    specializations: [],
+    conclusion: ""
 };
 
 export const achievements = [

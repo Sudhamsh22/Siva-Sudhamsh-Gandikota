@@ -20,7 +20,6 @@ const AnimatedCounter = ({ value, text }: { value: number; text: string }) => {
     const ref = useRef<HTMLSpanElement>(null);
     const isInView = useInView(ref, { once: true, margin: "-100px" });
     const [count, setCount] = React.useState(0);
-    const isMobile = useIsMobile();
   
     React.useEffect(() => {
       if (isInView) {
@@ -69,23 +68,6 @@ export function AboutSection() {
           <h2 className="section-heading text-left">About Me</h2>
           <p className="mt-4 text-lg text-muted-foreground leading-relaxed">
             {aboutData.summary}
-          </p>
-          <div className="mt-6 space-y-4">
-            {aboutData.specializations.map((spec, index) => (
-              <motion.div 
-                key={index} 
-                className="flex items-start gap-3"
-                initial={{ opacity: 0, x: -20 }}
-                animate={isInView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-              >
-                <div className="w-5 h-5 bg-primary/20 text-primary rounded-full flex-shrink-0 mt-1 flex items-center justify-center font-bold text-sm">→</div>
-                <span>{spec}</span>
-              </motion.div>
-            ))}
-          </div>
-           <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
-            {aboutData.conclusion}
           </p>
         </motion.div>
         <motion.div
