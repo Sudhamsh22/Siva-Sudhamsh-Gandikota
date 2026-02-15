@@ -9,20 +9,16 @@ import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 
 export function AnimatedBackground() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const densitySliderRef = useRef<HTMLInputElement>(null);
-    const themeButtonsRef = useRef<HTMLDivElement>(null);
     const pausePlayBtnRef = useRef<HTMLButtonElement>(null);
 
-    const [density, setDensity] = useState(100);
     const [isPaused, setIsPaused] = useState(false);
-    const [activeTheme, setActiveTheme] = useState(0);
 
     useEffect(() => {
         if (typeof window === 'undefined' || !canvasRef.current) return;
 
         const config = {
             paused: false,
-            activePaletteIndex: 0,
+            activePaletteIndex: 2,
             currentFormation: 0,
             numFormations: 3,
             densityFactor: 1
@@ -795,59 +791,6 @@ export function AnimatedBackground() {
             });
         }
 
-        function updateTheme(paletteIndex: number) {
-            config.activePaletteIndex = paletteIndex;
-            setActiveTheme(paletteIndex);
-            if (!nodesMesh || !connectionsMesh || !neuralNetwork) return;
-            const palette = colorPalettes[paletteIndex];
-            const nodeColorsAttr = nodesMesh.geometry.attributes.nodeColor as THREE.BufferAttribute;
-            for (let i = 0; i < nodeColorsAttr.count; i++) {
-                const node = neuralNetwork.nodes[i];
-                if (!node) continue;
-                const colorIndex = Math.min(node.level, palette.length - 1);
-                const baseColor = palette[colorIndex % palette.length].clone();
-                baseColor.offsetHSL(
-                    THREE.MathUtils.randFloatSpread(0.03),
-                    THREE.MathUtils.randFloatSpread(0.08),
-                    THREE.MathUtils.randFloatSpread(0.08)
-                );
-                nodeColorsAttr.setXYZ(i, baseColor.r, baseColor.g, baseColor.b);
-            }
-            nodeColorsAttr.needsUpdate = true;
-            const connectionColors: number[] = [];
-            const processedConnections = new Set();
-            neuralNetwork.nodes.forEach((node, nodeIndex) => {
-                node.connections.forEach(connection => {
-                    const connectedNode = connection.node;
-                    const connectedIndex = neuralNetwork!.nodes.indexOf(connectedNode);
-                    if (connectedIndex === -1) return;
-                    const key = [Math.min(nodeIndex, connectedIndex), Math.max(nodeIndex, connectedIndex)].join('-');
-                    if (!processedConnections.has(key)) {
-                        processedConnections.add(key);
-                        const numSegments = 20;
-                        for (let i = 0; i < numSegments; i++) {
-                            const avgLevel = Math.min(Math.floor((node.level + connectedNode.level) / 2), palette.length - 1);
-                            const baseColor = palette[avgLevel % palette.length].clone();
-                            baseColor.offsetHSL(
-                                THREE.MathUtils.randFloatSpread(0.03),
-                                THREE.MathUtils.randFloatSpread(0.08),
-                                THREE.MathUtils.randFloatSpread(0.08)
-                            );
-                            connectionColors.push(baseColor.r, baseColor.g, baseColor.b);
-                        }
-                    }
-                });
-            });
-            connectionsMesh.geometry.setAttribute('connectionColor', new THREE.Float32BufferAttribute(connectionColors, 3));
-            (connectionsMesh.geometry.attributes.connectionColor as THREE.BufferAttribute).needsUpdate = true;
-            palette.forEach((color, i) => {
-                if (i < 3) {
-                    ((nodesMesh.material as THREE.ShaderMaterial).uniforms.uPulseColors.value as THREE.Color[])[i].copy(color);
-                    ((connectionsMesh.material as THREE.ShaderMaterial).uniforms.uPulseColors.value as THREE.Color[])[i].copy(color);
-                }
-            });
-        }
-
         const raycaster = new THREE.Raycaster();
         const pointer = new THREE.Vector2();
         const interactionPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
@@ -912,21 +855,6 @@ export function AnimatedBackground() {
             composer.render();
         }
 
-        const handleThemeChange = (e: Event) => {
-            const detail = (e as CustomEvent).detail;
-            updateTheme(detail);
-            if (themeButtonsRef.current) {
-                themeButtonsRef.current.querySelectorAll('.theme-button').forEach(b => b.classList.remove('active'));
-                themeButtonsRef.current.querySelector(`.theme-button[data-theme="${detail}"]`)?.classList.add('active');
-            }
-        };
-
-        const handleDensityChange = (e: Event) => {
-            const detail = (e as CustomEvent).detail;
-            config.densityFactor = detail;
-            createNetworkVisualization(config.currentFormation, config.densityFactor);
-        };
-
         const handleMorph = () => {
             config.currentFormation = (config.currentFormation + 1) % config.numFormations;
             createNetworkVisualization(config.currentFormation, config.densityFactor);
@@ -945,8 +873,6 @@ export function AnimatedBackground() {
             setTimeout(() => { controls.autoRotate = true; }, 2000);
         };
 
-        window.addEventListener('theme-change', handleThemeChange);
-        window.addEventListener('density-change', handleDensityChange);
         window.addEventListener('morph', handleMorph);
         window.addEventListener('pause-play', handlePausePlay);
         window.addEventListener('reset-camera', handleReset);
@@ -954,10 +880,6 @@ export function AnimatedBackground() {
 
         function init() {
             createNetworkVisualization(config.currentFormation, config.densityFactor);
-            if(themeButtonsRef.current) {
-                themeButtonsRef.current.querySelectorAll('.theme-button').forEach(b => b.classList.remove('active'));
-                themeButtonsRef.current.querySelector(`.theme-button[data-theme="${config.activePaletteIndex}"]`)?.classList.add('active');
-            }
             animate();
         }
         
@@ -978,8 +900,6 @@ export function AnimatedBackground() {
             renderer.domElement.removeEventListener('click', handleCanvasClick);
             renderer.domElement.removeEventListener('touchstart', handleCanvasClick);
 
-            window.removeEventListener('theme-change', handleThemeChange);
-            window.removeEventListener('density-change', handleDensityChange);
             window.removeEventListener('morph', handleMorph);
             window.removeEventListener('pause-play', handlePausePlay);
             window.removeEventListener('reset-camera', handleReset);
@@ -1000,24 +920,6 @@ export function AnimatedBackground() {
 
     }, []);
 
-    const handleThemeChange = (themeIndex: number) => {
-        window.dispatchEvent(new CustomEvent('theme-change', { detail: themeIndex }));
-        setActiveTheme(themeIndex);
-    };
-
-    let densityTimeout: NodeJS.Timeout;
-    const handleDensityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = parseInt(e.target.value, 10);
-        setDensity(val);
-        if (densitySliderRef.current) {
-            densitySliderRef.current.style.setProperty('--val', `${val}%`);
-        }
-        clearTimeout(densityTimeout);
-        densityTimeout = setTimeout(() => {
-            window.dispatchEvent(new CustomEvent('density-change', { detail: val / 100 }));
-        }, 400);
-    };
-    
     const handleMorph = () => {
         window.dispatchEvent(new CustomEvent('morph'));
     };
@@ -1033,30 +935,6 @@ export function AnimatedBackground() {
 
     return (
         <div className="fixed inset-0 z-[-1]">
-            <div id="instructions-container" className="glass-panel">
-                <div id="instruction-title">Quantum Neural Network</div>
-                <div className="instruction-text">Click to send energy pulses. <br />Drag to explore the structure.</div>
-            </div>
-            <div id="theme-selector" className="glass-panel">
-                <div style={{ flex: 1 }}>
-                    <div id="theme-selector-title">Crystal Theme</div>
-                    <div ref={themeButtonsRef} className="theme-grid">
-                        <button className={`theme-button ${activeTheme === 0 ? 'active' : ''}`} id="theme-1" data-theme="0" aria-label="Purple Nebula" onClick={() => handleThemeChange(0)}></button>
-                        <button className={`theme-button ${activeTheme === 1 ? 'active' : ''}`} id="theme-2" data-theme="1" aria-label="Sunset Fire" onClick={() => handleThemeChange(1)}></button>
-                        <button className={`theme-button ${activeTheme === 2 ? 'active' : ''}`} id="theme-3" data-theme="2" aria-label="Ocean Aurora" onClick={() => handleThemeChange(2)}></button>
-                    </div>
-                </div>
-                <div id="density-controls" style={{ flex: 1 }}>
-                    <div className="density-label"><span>Density</span><span id="density-value">{density}%</span></div>
-                    <input
-                        ref={densitySliderRef}
-                        type="range" min="30" max="100" value={density}
-                        className="density-slider" id="density-slider"
-                        aria-label="Network Density"
-                        onInput={handleDensityChange}
-                    />
-                </div>
-            </div>
             <div id="control-buttons">
                 <button id="change-formation-btn" className="control-button" onClick={handleMorph}><span>Morph</span></button>
                 <button id="pause-play-btn" className="control-button" ref={pausePlayBtnRef} onClick={handlePausePlay}><span>{isPaused ? 'Play' : 'Freeze'}</span></button>
