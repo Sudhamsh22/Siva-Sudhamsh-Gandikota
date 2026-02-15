@@ -46,7 +46,7 @@ export function ExperienceSection() {
               </motion.div>
               
               <motion.div
-                className={`w-full md:w-5/12 ${isLeft ? 'md:ml-auto md:pl-12' : 'md:mr-auto md:pr-12'}`}
+                className={`w-full md:w-5/12 ${isLeft ? 'md:ml-auto md:pl-8' : 'md:mr-auto md:pr-8'}`}
                 initial={{ opacity: 0, x: isLeft ? 50 : -50 }}
                 animate={itemInView ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 0.7 }}
