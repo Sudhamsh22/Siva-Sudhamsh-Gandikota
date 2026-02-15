@@ -16,42 +16,31 @@ const iconMap: { [key: string]: React.ElementType } = {
     'Contact': Mail
 };
 
-const DockItem = ({ mouseX, link, handleLinkClick, isMobile }: { mouseX: any, link: typeof navLinks[0], handleLinkClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void, isMobile: boolean }) => {
+const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    const element = document.querySelector(href);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+};
+
+const DockItem = ({ mouseX, link }: { mouseX: any, link: typeof navLinks[0] }) => {
   const Icon = iconMap[link.label];
   const ref = useRef<HTMLAnchorElement>(null);
 
   const distance = useTransform(mouseX, (val) => {
-    if (isMobile) return 0;
     const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
     return val - bounds.x - bounds.width / 2;
   });
 
-  const widthSync = useTransform(distance, [-100, 0, 100], [48, 72, 48]);
+  // Adjust the range and magnification for a better feel
+  const widthSync = useTransform(distance, [-120, 0, 120], [48, 80, 48]);
+  // Tweak spring settings for less lag
   const width = useSpring(widthSync, {
     mass: 0.1,
-    stiffness: 150,
-    damping: 12,
+    stiffness: 200,
+    damping: 15,
   });
-
-  if (isMobile) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <a
-            href={link.href}
-            onClick={(e) => handleLinkClick(e, link.href)}
-            className="flex h-12 w-12 items-center justify-center rounded-full text-muted-foreground transition-all duration-300 hover:bg-primary/10 hover:text-primary"
-            aria-label={link.label}
-          >
-            {Icon && <Icon className="h-6 w-6" />}
-          </a>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>{link.label}</p>
-        </TooltipContent>
-      </Tooltip>
-    );
-  }
 
   return (
     <Tooltip>
@@ -61,7 +50,7 @@ const DockItem = ({ mouseX, link, handleLinkClick, isMobile }: { mouseX: any, li
           style={{ width }}
           href={link.href}
           onClick={(e) => handleLinkClick(e, link.href)}
-          className="flex aspect-square items-center justify-center rounded-full text-muted-foreground transition-all duration-300 hover:bg-primary/10 hover:text-primary"
+          className="flex aspect-square items-center justify-center rounded-full text-muted-foreground transition-colors duration-300 hover:bg-primary/10 hover:text-primary"
           aria-label={link.label}
         >
           {Icon && <Icon className="h-6 w-6" />}
@@ -75,17 +64,55 @@ const DockItem = ({ mouseX, link, handleLinkClick, isMobile }: { mouseX: any, li
 };
 
 
+const MobileDock = () => {
+    return (
+        <nav className="flex items-end h-16 gap-2 rounded-full border border-primary/10 bg-card/50 p-2 shadow-lg backdrop-blur-lg">
+            {navLinks.map((link) => {
+                const Icon = iconMap[link.label];
+                return (
+                    <Tooltip key={link.href}>
+                        <TooltipTrigger asChild>
+                        <a
+                            href={link.href}
+                            onClick={(e) => handleLinkClick(e, link.href)}
+                            className="flex h-12 w-12 items-center justify-center rounded-full text-muted-foreground transition-all duration-300 hover:bg-primary/10 hover:text-primary"
+                            aria-label={link.label}
+                        >
+                            {Icon && <Icon className="h-6 w-6" />}
+                        </a>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                        <p>{link.label}</p>
+                        </TooltipContent>
+                    </Tooltip>
+                )
+            })}
+        </nav>
+    );
+};
+
+
 export function Header() {
   const isMobile = useIsMobile();
-  let mouseX = useMotionValue(Infinity);
+  const mouseX = useMotionValue(Infinity);
   
-  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  // This helps prevent a flash of the desktop dock on mobile
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => setMounted(true), []);
+
+  if (!mounted) {
+    return null; // or a placeholder
+  }
+
+  if (isMobile) {
+    return (
+        <header className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
+            <TooltipProvider>
+                <MobileDock />
+            </TooltipProvider>
+        </header>
+    )
+  }
 
   return (
     <header className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
@@ -96,7 +123,7 @@ export function Header() {
           className="flex items-end h-16 gap-2 rounded-full border border-primary/10 bg-card/50 p-2 shadow-lg backdrop-blur-lg"
         >
           {navLinks.map((link) => (
-            <DockItem key={link.href} mouseX={mouseX} link={link} handleLinkClick={handleLinkClick} isMobile={isMobile} />
+            <DockItem key={link.href} mouseX={mouseX} link={link} />
           ))}
         </motion.nav>
       </TooltipProvider>
