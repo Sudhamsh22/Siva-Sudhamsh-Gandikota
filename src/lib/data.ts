@@ -211,7 +211,7 @@ export const leadershipAndAchievements = [
       description: 'Successfully managed a major tech event with over 200 participants, fostering innovation and collaboration.',
     },
     {
-      title: '$5K+ sponsorships secured',
+      title: 'Rs 100,000 sponsorships secured',
       description: 'Established and maintained relationships with corporate partners, securing vital funding for events and initiatives.',
     },
     {
