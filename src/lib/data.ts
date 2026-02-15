@@ -68,7 +68,7 @@ export const skills = [
     technologies: [
       { name: 'React', level: 'Advanced', proficiency: 90, icon: 'Code' },
       { name: 'Next.js', level: 'Advanced', proficiency: 85, icon: 'Code' },
-      { name: 'Redux', level: 'Intermediate', proficiency: 75, icon: 'Code' },
+      { name: 'Redux', level: 'Beginner', proficiency: 30, icon: 'Code' },
       { name: 'Tailwind CSS', level: 'Expert', proficiency: 95, icon: 'Code' },
     ],
   },
@@ -76,9 +76,9 @@ export const skills = [
     category: 'Databases',
     icon: Database,
     technologies: [
-      { name: 'PostgreSQL', level: 'Advanced', proficiency: 80, icon: 'Database' },
+      { name: 'PostgreSQL', level: 'Intermediete', proficiency: 60, icon: 'Database' },
       { name: 'MongoDB', level: 'Advanced', proficiency: 85, icon: 'Database' },
-      { name: 'Redis', level: 'Intermediate', proficiency: 70, icon: 'Database' },
+      { name: 'Redis', level: 'Beginner', proficiency: 30, icon: 'Database' },
     ],
   },
   {
@@ -88,7 +88,7 @@ export const skills = [
       { name: 'Docker', level: 'Advanced', proficiency: 85, icon: 'Cloud' },
       { name: 'AWS', level: 'Intermediate', proficiency: 70, icon: 'Cloud' },
       { name: 'Azure', level: 'Intermediate', proficiency: 65, icon: 'Cloud' },
-      { name: 'CI/CD', level: 'Advanced', proficiency: 80, icon: 'Cloud' },
+      { name: 'CI/CD', level: 'Intermediate', proficiency: 60, icon: 'Cloud' },
     ],
   },
 ];
@@ -110,7 +110,7 @@ export const experience = [
         company: "Freelance",
         duration: "Mar 2025 - Present",
         description: [
-            "Engineered APIs handling over 5K daily requests with 99.8% uptime.",
+            "Engineered APIs handling over 2k daily requests with 99.8% uptime.",
             "Achieved an 85% performance boost in web applications (800ms to 120ms load time).",
             "Developed and maintained full-stack applications for various SaaS clients."
         ]
@@ -179,7 +179,7 @@ export const certifications = [
 ];
 
 export const socialLinks = {
-    github: 'https://github.com',
-    linkedin: 'https://linkedin.com/in',
-    email: 'siva.gandikota@example.com'
+    github: 'https://github.com/Sudhamsh22',
+    linkedin: 'https://linkedin.com/sivasudhamsh',
+    email: 'sivasudhamsh2005@gmail.com'
 };

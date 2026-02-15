@@ -47,7 +47,7 @@ export function HeroSection() {
         document.querySelector('#projects')?.scrollIntoView({ behavior: 'smooth' });
     }
   return (
-    <section id="home" className="h-screen flex items-center justify-center text-center -mt-20">
+    <section id="home" className="h-screen flex items-center justify-center text-center">
       <div className="relative z-10">
         <motion.h1 
           className="text-4xl sm:text-6xl md:text-7xl font-headline font-bold tracking-tighter"
