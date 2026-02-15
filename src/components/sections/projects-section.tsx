@@ -1,4 +1,3 @@
-import { generateProjectInsights } from '@/ai/flows/generate-project-insights';
 import { projects } from '@/lib/data';
 import Image from 'next/image';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,23 +6,8 @@ import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Github, ExternalLink } from 'lucide-react';
 
-async function ProjectCard({ project }: { project: typeof projects[0] }) {
-  let insight = project.description;
-
-  if (project.id === 'autotuning-ai') {
-    try {
-      insight = await generateProjectInsights({
-        projectName: project.name,
-        description: project.description,
-        stats: project.stats.map(s => `${s.value} ${s.label}`),
-        techStack: project.tech,
-      });
-    } catch (error) {
-      console.error("Failed to generate project insight:", error);
-      // Fallback to description
-      insight = project.description;
-    }
-  }
+function ProjectCard({ project }: { project: typeof projects[0] }) {
+  const insight = project.description;
 
   const projectImage = PlaceHolderImages.find(p => p.id === project.id);
 

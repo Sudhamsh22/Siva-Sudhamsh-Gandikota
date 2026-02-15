@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { AIAssistantChat } from '@/components/contact/ai-assistant-chat';
 import { socialLinks } from '@/lib/data';
 import { Github, Linkedin, Mail } from 'lucide-react';
 
@@ -52,27 +51,19 @@ export function ContactSection() {
       >
         <h2 className="section-heading">Get In Touch</h2>
         <p className="section-subheading">
-          Have a project in mind, a question, or just want to connect? Feel free to reach out. Or, chat with my AI assistant!
+          Have a project in mind, a question, or just want to connect? Feel free to reach out.
         </p>
       </motion.div>
 
-      <div className="mt-16 grid lg:grid-cols-2 gap-16 items-start">
+      <div className="mt-16">
         <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          animate={isInView ? { opacity: 1, x: 0 } : {}}
+          className="space-y-8 max-w-lg mx-auto"
+          initial={{ opacity: 0, y: 50 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, delay: 0.2 }}
         >
-          <AIAssistantChat />
-        </motion.div>
-        
-        <motion.div
-          className="space-y-8"
-          initial={{ opacity: 0, x: 50 }}
-          animate={isInView ? { opacity: 1, x: 0 } : {}}
-          transition={{ duration: 0.7, delay: 0.4 }}
-        >
           <div>
-            <h3 className="text-2xl font-headline font-bold mb-4">Or Send a Message Directly</h3>
+            <h3 className="text-2xl font-headline font-bold mb-4 text-center">Send a Message</h3>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <FormField
