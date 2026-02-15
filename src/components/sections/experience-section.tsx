@@ -5,6 +5,7 @@ import { motion, useInView } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { experience } from '@/lib/data';
 import { BrainCircuit, Server } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const iconMap: { [key: string]: React.ElementType } = {
   'Vishwam AI': BrainCircuit,
@@ -34,7 +35,7 @@ export function ExperienceSection() {
           const itemInView = useInView(itemRef, { once: true, margin: '-200px' });
           
           return (
-            <div key={index} ref={itemRef} className="relative mb-12 md:mb-24">
+            <div key={index} ref={itemRef} className={cn("relative", index === experience.length - 1 ? 'mb-0' : 'mb-12 md:mb-24' )}>
               <motion.div
                 className="absolute left-1/2 -translate-x-1/2 top-0 w-10 h-10 bg-background border-2 border-primary rounded-full flex items-center justify-center z-10"
                 initial={{ scale: 0 }}

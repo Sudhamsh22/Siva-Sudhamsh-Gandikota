@@ -102,6 +102,7 @@ export default {
         'accordion-up': 'accordion-up 0.2s ease-out',
         'glow': 'glow 2s ease-in-out infinite',
         'float': 'float 4s ease-in-out infinite',
+        'ping-slow': 'ping 3s cubic-bezier(0, 0, 0.2, 1) infinite',
       },
     },
   },

@@ -97,7 +97,3 @@ export function SkillsSection() {
     </section>
   );
 }
-
-// Add a custom animation to tailwind config if not present
-// in tailwind.config.ts > animation:
-// 'ping-slow': 'ping 3s cubic-bezier(0, 0, 0.2, 1) infinite',

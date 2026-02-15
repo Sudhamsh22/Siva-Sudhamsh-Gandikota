@@ -3,8 +3,15 @@
 import { Github, Linkedin, Mail, ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { socialLinks } from '@/lib/data';
+import React from 'react';
 
 export function Footer() {
+  const [year, setYear] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
+
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -17,7 +24,7 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
         <div className="text-center md:text-left">
           <p className="text-muted-foreground">
-            &copy; {new Date().getFullYear()} Siva Sudhamsh Gandikota. All rights reserved.
+            &copy; {year || ''} Siva Sudhamsh Gandikota. All rights reserved.
           </p>
           <p className="text-sm text-muted-foreground/70">
             Designed with 🚀, built with Next.js & Tailwind CSS.

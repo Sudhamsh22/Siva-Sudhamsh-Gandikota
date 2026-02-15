@@ -669,13 +669,11 @@ export function AnimatedBackground() {
                         node.connections = node.connections.filter(conn => toKeep.has(conn.node));
                     });
                 }
-                console.log(`Density: ${nodes.length} nodes`);
             }
             return { nodes, rootNode };
         }
 
         function createNetworkVisualization(formationIndex: number, densityFactor = 1.0) {
-            console.log(`Creating formation ${formationIndex}, density ${densityFactor}`);
             if (nodesMesh) {
                 scene.remove(nodesMesh);
                 nodesMesh.geometry.dispose();
