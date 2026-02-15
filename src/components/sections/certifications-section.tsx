@@ -5,6 +5,7 @@ import { motion, useInView } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { certifications } from '@/lib/data';
 import { BadgeCheck } from 'lucide-react';
+import Magnet from '@/components/ui/magnet';
 
 export function CertificationsSection() {
   const ref = React.useRef(null);
@@ -44,18 +45,20 @@ export function CertificationsSection() {
       >
         {certifications.map((cert, index) => (
           <motion.div key={index} variants={itemVariants}>
-            <Card className="glass-card group h-full overflow-hidden">
-              <CardContent className="p-6 text-center flex flex-col items-center justify-center h-full">
-                <div className="relative w-24 h-24 mb-4">
-                  {/* For simplicity, we'll use a generic icon. In a real project, you'd use cert.logo */}
-                  <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center">
-                    <BadgeCheck className="w-12 h-12 text-primary" />
+            <Magnet>
+              <Card className="glass-card group h-full overflow-hidden">
+                <CardContent className="p-6 text-center flex flex-col items-center justify-center h-full">
+                  <div className="relative w-24 h-24 mb-4">
+                    {/* For simplicity, we'll use a generic icon. In a real project, you'd use cert.logo */}
+                    <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center">
+                      <BadgeCheck className="w-12 h-12 text-primary" />
+                    </div>
                   </div>
-                </div>
-                <h3 className="font-bold text-lg text-foreground">{cert.name}</h3>
-                <p className="text-muted-foreground text-sm mt-1">{cert.issuer}</p>
-              </CardContent>
-            </Card>
+                  <h3 className="font-bold text-lg text-foreground">{cert.name}</h3>
+                  <p className="text-muted-foreground text-sm mt-1">{cert.issuer}</p>
+                </CardContent>
+              </Card>
+            </Magnet>
           </motion.div>
         ))}
       </motion.div>
