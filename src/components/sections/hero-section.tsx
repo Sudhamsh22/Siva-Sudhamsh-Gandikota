@@ -69,7 +69,7 @@ export function HeroSection() {
           {heroData.title}
         </p>
         <div
-            className="mt-6 text-base md:text-xl text-primary font-mono h-8"
+            className="mt-6 text-lg md:text-2xl text-foreground font-mono font-bold"
         >
             <AnimatedTyping />
         </div>
