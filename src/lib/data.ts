@@ -33,12 +33,10 @@ export const aboutData = {
 };
 
 export const achievements = [
-    { label: "ML Model Accuracy", value: 92 },
+    { label: 'ML Model Accuracy', value: 92 },
     { label: "Concurrent Users", value: 500 },
     { label: "Students Mentored", value: 40 },
     { label: "Performance Improvement", value: 85 },
-    { label: "Monthly Active Users", value: 1000 },
-    { label: "Sponsorships Secured", value: 100000 },
 ];
 
 export const skills = [
@@ -232,6 +230,6 @@ export const certifications = [
 
 export const socialLinks = {
     github: 'https://github.com/Sudhamsh22',
-    linkedin: 'https://linkedin.com/sivasudhamsh',
+    linkedin: 'https://www.linkedin.com/in/sivasudhamsh',
     email: 'sivasudhamsh2005@gmail.com'
 };
