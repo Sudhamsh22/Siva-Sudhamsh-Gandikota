@@ -23,9 +23,9 @@ export const heroData = {
 export const aboutData = {
     summary: "Computer Science student (AI specialization) with hands-on experience in machine learning and full-stack development. Passionate about applying AI to solve real-world problems, I have a proven track record of:",
     bulletPoints: [
-        "Fine-tuning ML models to achieve 92% accuracy.",
-        "Building production applications serving 500+ concurrent users.",
-        "Developing with RESTful microservices (FastAPI, Node.js) and computer vision (YOLO).",
+        "Fine-tuning ML models to achieve 92% accuracy at Vishwam AI.",
+        "Building production applications serving 500+ concurrent users for freelance clients.",
+        "Proficient in RESTful microservices (FastAPI, Node.js) and computer vision (YOLO).",
         "Deploying scalable systems from development to production."
     ],
     specializations: [],
@@ -35,7 +35,6 @@ export const aboutData = {
 export const achievements = [
     { label: "ML Model Accuracy", value: 92 },
     { label: "Concurrent Users", value: 500 },
-    { label: "API Uptime", value: 99.8 },
     { label: "Students Mentored", value: 40 },
     { label: "Performance Improvement", value: 85 },
     { label: "Monthly Active Users", value: 1000 },

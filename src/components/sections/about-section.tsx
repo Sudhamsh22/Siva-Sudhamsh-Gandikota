@@ -6,14 +6,14 @@ import { motion, useInView } from 'framer-motion';
 import { aboutData, achievements } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent } from '@/components/ui/card';
-import { Target, Zap, Users, ShieldCheck, CheckCircle } from 'lucide-react';
+import { Target, Zap, Users, CheckCircle, TrendingUp } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const iconMap = {
   'ML Model Accuracy': Target,
   'Concurrent Users': Users,
-  'API Uptime': ShieldCheck,
   'Students Mentored': Zap,
+  'Performance Improvement': TrendingUp,
 };
 
 const AnimatedCounter = ({ value, text }: { value: number; text: string }) => {
