@@ -41,7 +41,7 @@ function ProjectCard({ project }: { project: typeof projects[0] }) {
         </div>
       </CardHeader>
       <CardContent className="flex-grow p-3 pt-0">
-        <p className="text-muted-foreground text-xs">{insight}</p>
+        <p className="text-muted-foreground text-xs line-clamp-3">{insight}</p>
         <div className="flex flex-wrap gap-1.5 pt-3">
           {project.tech.map(tech => (
             <Badge key={tech} variant="outline" className="text-xs">{tech}</Badge>
