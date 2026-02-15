@@ -25,15 +25,15 @@ function ProjectCard({ project }: { project: typeof projects[0] }) {
           />
         </div>
       )}
-      <CardHeader>
-        <CardTitle className="font-headline text-2xl text-primary">{project.name}</CardTitle>
+      <CardHeader className="p-4">
+        <CardTitle className="font-headline text-xl text-primary">{project.name}</CardTitle>
         <div className="flex flex-wrap gap-2 pt-2">
           {project.stats.map(stat => (
             <Badge key={stat.label} variant="secondary">{stat.value} {stat.label}</Badge>
           ))}
         </div>
       </CardHeader>
-      <CardContent className="flex-grow">
+      <CardContent className="flex-grow p-4 pt-0">
         <p className="text-muted-foreground text-sm">{insight}</p>
         <div className="flex flex-wrap gap-2 pt-4">
           {project.tech.map(tech => (
@@ -41,16 +41,16 @@ function ProjectCard({ project }: { project: typeof projects[0] }) {
           ))}
         </div>
       </CardContent>
-      <CardFooter className="flex gap-2">
+      <CardFooter className="flex gap-2 p-4">
         {project.links.live && (
-          <Button asChild>
+          <Button asChild size="sm">
             <a href={project.links.live} target="_blank" rel="noopener noreferrer">
               Live Demo <ExternalLink className="ml-2" />
             </a>
           </Button>
         )}
         {project.links.github && (
-          <Button variant="outline" asChild>
+          <Button variant="outline" asChild size="sm">
             <a href={project.links.github} target="_blank" rel="noopener noreferrer">
               GitHub <Github className="ml-2" />
             </a>
