@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { ArrowDown, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { heroData } from '@/lib/data';
-import { LampContainer } from '@/components/ui/lamp';
 
 const AnimatedTyping = () => {
     const [text, setText] = useState('');
@@ -48,7 +47,7 @@ export function HeroSection() {
         document.querySelector('#projects')?.scrollIntoView({ behavior: 'smooth' });
     }
   return (
-    <LampContainer id="home">
+    <section id="home" className="flex min-h-screen flex-col items-center justify-center w-full">
       <motion.div
         initial={{ opacity: 0.5, y: 100 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -89,6 +88,6 @@ export function HeroSection() {
             </Button>
         </div>
       </motion.div>
-    </LampContainer>
+    </section>
   );
 }
