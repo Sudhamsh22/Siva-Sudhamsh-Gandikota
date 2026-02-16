@@ -180,7 +180,7 @@ export const projects = [
         ],
         tech: ["React", "MongoDB", "Node.js"],
         links: {
-            live: "https://gov-connect-hzqraa4uv-sivasudhamsh2005-3889s-projects.vercel.app/",
+            live: "https://gov-connect-three.vercel.app/",
             github: "https://github.com/Sudhamsh22/Gov-Connect.git"
         }
     },
