@@ -167,7 +167,7 @@ export const projects = [
         ],
         tech: ["React", "Tailwind CSS"],
         links: {
-            live: "https://samardhya-landing-page-19qaueaz8.vercel.app/",
+            live: "https://samardhya-landing-page.vercel.app/",
             github: "https://github.com/Sudhamsh22/Samardhya_Landing-page.git"
         }
     },
