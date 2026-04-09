@@ -7,7 +7,6 @@ import { aboutData, achievements } from '@/lib/data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent } from '@/components/ui/card';
 import { Target, Zap, Users, CheckCircle, TrendingUp } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 const iconMap = {
   'ML Model Accuracy': Target,
@@ -53,7 +52,7 @@ const AnimatedCounter = ({ value, text }: { value: number; text: string }) => {
 export function AboutSection() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-200px' });
-  
+
   const avatarImage = PlaceHolderImages.find(p => p.id === 'siva-avatar');
 
   return (

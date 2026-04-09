@@ -4,7 +4,7 @@ import React from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { leadershipAndAchievements } from '@/lib/data';
-import { Award, Users, DollarSign, Presentation, Briefcase, Star } from 'lucide-react';
+import { Award, DollarSign, Presentation, Briefcase, Star } from 'lucide-react';
 
 const iconMap: { [key: string]: React.ElementType } = {
   'Vice-President': Star,
@@ -34,7 +34,7 @@ export function AchievementsSection() {
     <section id="achievements" ref={ref}>
       <h2 className="section-heading">Leadership & Achievements</h2>
       <p className="section-subheading">
-        Beyond the code, I'm passionate about building communities and fostering growth.
+        Beyond the code, I&apos;m passionate about building communities and fostering growth.
       </p>
       <div className="mt-16 grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         {leadershipAndAchievements.map((achievement, index) => {

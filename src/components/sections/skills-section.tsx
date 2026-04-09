@@ -2,29 +2,11 @@
 
 import React from 'react';
 import { motion, useInView } from 'framer-motion';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { skills } from '@/lib/data';
-import {
-  Server,
-  BrainCircuit,
-  Code,
-  Database,
-  Cloud,
-  Icon as LucideIcon,
-  Cpu,
-  Smartphone,
-  PenTool,
-} from 'lucide-react';
+import { Code, Cpu } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-const categoryIcons: { [key: string]: LucideIcon } = {
-  'Backend & APIs': Server,
-  'AI/ML': BrainCircuit,
-  'Frontend': Code,
-  'Databases': Database,
-  'Cloud & DevOps': Cloud,
-};
 
 export function SkillsSection() {
   const ref = React.useRef(null);
@@ -52,7 +34,7 @@ export function SkillsSection() {
     <section id="skills" ref={ref}>
       <h2 className="section-heading">Technical Skills</h2>
       <p className="section-subheading">
-        My toolbox for building intelligent and scalable solutions. I'm always learning and expanding my skillset.
+        My toolbox for building intelligent and scalable solutions. I&apos;m always learning and expanding my skillset.
       </p>
       <div className="mt-16">
         <Tabs defaultValue={skills[0].category} className="w-full">

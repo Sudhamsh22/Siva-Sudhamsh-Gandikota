@@ -1,944 +1,483 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  motion,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  type MotionValue,
+} from 'framer-motion';
+import { RobotFigure } from './RobotFigure';
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const SECTION_IDS = [
+  'home',
+  'about',
+  'skills',
+  'experience',
+  'projects',
+  'achievements',
+  'certifications',
+  'contact',
+] as const;
+
+type SectionId = (typeof SECTION_IDS)[number];
+
+const SECTION_LABELS: Record<SectionId, string> = {
+  home: 'Launch',
+  about: 'Profile',
+  skills: 'Systems',
+  experience: 'Career',
+  projects: 'Projects',
+  achievements: 'Impact',
+  certifications: 'Proof',
+  contact: 'Contact',
+};
+
+const SECTION_LABEL_LIST = SECTION_IDS.map((id) => SECTION_LABELS[id]);
+
+const NOISE_SVG =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.02' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.8'/%3E%3C/svg%3E\")";
+
+// Spring configs extracted so they can be shared / tweaked in one place
+const SPRING_MOUSE = { stiffness: 90, damping: 24, mass: 0.3 } as const;
+const SPRING_SCROLL = { stiffness: 70, damping: 22, mass: 0.25 } as const;
+
+// Floating orb animation (defined once, not inline)
+const ORB_ANIMATION = {
+  x: [0, 14, -8, 0],
+  y: [0, -12, 10, 0],
+  opacity: [0.18, 0.28, 0.22, 0.18],
+};
+
+const ORB_TRANSITION = {
+  duration: 18,
+  repeat: Infinity,
+  ease: 'easeInOut',
+} as const;
+
+const SCAN_LINE_ANIMATION = {
+  opacity: [0.2, 0.5, 0.2],
+  scaleX: [0.85, 1.05, 0.85],
+};
+
+const SCAN_LINE_TRANSITION = {
+  duration: 7,
+  repeat: Infinity,
+  ease: 'easeInOut',
+} as const;
+
+interface BackgroundWord {
+  label: string;
+  top: number;
+  left: number;
+  size: number;
+  rotate: number;
+  layer: 1 | 2 | 3;
+  category: 'ml' | 'llm' | 'infra' | 'lang' | 'web';
+  driftX: number;
+  driftY: number;
+  duration: number;
+  delay: number;
+}
+
+const WORDS: BackgroundWord[] = [
+  { label: 'TensorFlow', top: 12, left: 3, size: 0.72, rotate: -9, layer: 1, category: 'ml', driftX: 6, driftY: -10, duration: 22, delay: 0 },
+  { label: 'PyTorch', top: 22, left: 6, size: 0.66, rotate: -5, layer: 2, category: 'ml', driftX: -8, driftY: 12, duration: 17, delay: 2.1 },
+  { label: 'Ultralytics', top: 32, left: 2, size: 0.8, rotate: -11, layer: 1, category: 'ml', driftX: 5, driftY: 8, duration: 24, delay: 4.4 },
+  { label: 'OpenCV', top: 42, left: 7, size: 0.62, rotate: -7, layer: 3, category: 'ml', driftX: -6, driftY: -14, duration: 14, delay: 1.2 },
+  { label: 'scikit-learn', top: 52, left: 3, size: 0.7, rotate: -8, layer: 2, category: 'ml', driftX: 9, driftY: 10, duration: 19, delay: 3.5 },
+  { label: 'NumPy', top: 62, left: 9, size: 0.64, rotate: -6, layer: 1, category: 'ml', driftX: -7, driftY: -8, duration: 23, delay: 6 },
+  { label: 'Pandas', top: 72, left: 5, size: 0.62, rotate: -9, layer: 3, category: 'ml', driftX: 5, driftY: 12, duration: 15, delay: 0.8 },
+  { label: 'XGBoost', top: 80, left: 12, size: 0.68, rotate: -5, layer: 2, category: 'ml', driftX: -9, driftY: -9, duration: 18, delay: 5.5 },
+  { label: 'LangChain', top: 17, left: 22, size: 0.78, rotate: 4, layer: 2, category: 'llm', driftX: 8, driftY: -11, duration: 20, delay: 1 },
+  { label: 'LangGraph', top: 35, left: 18, size: 0.68, rotate: 7, layer: 3, category: 'llm', driftX: -7, driftY: 13, duration: 16, delay: 3.3 },
+  { label: 'Hugging Face', top: 55, left: 20, size: 0.64, rotate: 3, layer: 1, category: 'llm', driftX: 6, driftY: 9, duration: 25, delay: 7.1 },
+  { label: 'Whisper', top: 75, left: 24, size: 0.72, rotate: 6, layer: 2, category: 'llm', driftX: -8, driftY: -10, duration: 21, delay: 2.7 },
+  { label: 'Groq', top: 88, left: 16, size: 0.6, rotate: 5, layer: 3, category: 'llm', driftX: 7, driftY: 11, duration: 13, delay: 4.9 },
+  { label: 'FastAPI', top: 10, left: 40, size: 0.7, rotate: -3, layer: 2, category: 'web', driftX: 5, driftY: -12, duration: 18, delay: 0.5 },
+  { label: 'React', top: 28, left: 42, size: 0.74, rotate: 2, layer: 1, category: 'web', driftX: -6, driftY: 10, duration: 26, delay: 3.8 },
+  { label: 'PostgreSQL', top: 68, left: 38, size: 0.64, rotate: -4, layer: 3, category: 'infra', driftX: 8, driftY: -10, duration: 14, delay: 1.6 },
+  { label: 'MongoDB', top: 82, left: 44, size: 0.66, rotate: 3, layer: 2, category: 'infra', driftX: -5, driftY: 13, duration: 20, delay: 5.2 },
+  { label: 'AWS', top: 62, left: 80, size: 0.72, rotate: 10, layer: 1, category: 'infra', driftX: -8, driftY: -10, duration: 24, delay: 0.3 },
+  { label: 'Docker', top: 72, left: 84, size: 0.66, rotate: 8, layer: 3, category: 'infra', driftX: 6, driftY: 12, duration: 15, delay: 2.4 },
+  { label: 'Redis', top: 82, left: 78, size: 0.6, rotate: 9, layer: 2, category: 'infra', driftX: -7, driftY: -8, duration: 19, delay: 6.7 },
+  { label: 'C++', top: 75, left: 70, size: 0.82, rotate: 7, layer: 3, category: 'lang', driftX: 9, driftY: -13, duration: 14, delay: 1.9 },
+  { label: 'Python', top: 86, left: 62, size: 0.76, rotate: 6, layer: 1, category: 'lang', driftX: -6, driftY: 10, duration: 23, delay: 4.3 },
+  { label: 'YOLO', top: 68, left: 74, size: 0.88, rotate: 11, layer: 2, category: 'ml', driftX: 7, driftY: -11, duration: 17, delay: 3 },
+];
+
+const CATEGORY_TINT: Record<BackgroundWord['category'], string> = {
+  ml: 'rgba(96, 200, 255, VAR)',
+  llm: 'rgba(160, 140, 255, VAR)',
+  infra: 'rgba(80, 220, 190, VAR)',
+  lang: 'rgba(220, 200, 100, VAR)',
+  web: 'rgba(180, 210, 255, VAR)',
+};
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function padProgress(value: number): string {
+  return String(Math.round(value * 100)).padStart(3, '0');
+}
+
+// ─── Hook: useScrollState ─────────────────────────────────────────────────────
+
+interface ScrollState {
+  progress: number;
+  activeIndex: number;
+}
+
+function useScrollState(): ScrollState {
+  const [state, setState] = useState<ScrollState>({ progress: 0, activeIndex: 0 });
+  const rafRef = useRef<number>(0);
+
+  const measure = useCallback(() => {
+    const maxScroll = Math.max(
+      document.documentElement.scrollHeight - window.innerHeight,
+      1,
+    );
+    const nextProgress = clamp(window.scrollY / maxScroll, 0, 1);
+    const probe = window.scrollY + window.innerHeight * 0.35;
+
+    let closestIndex = 0;
+    let closestDistance = Infinity;
+
+    for (let i = 0; i < SECTION_IDS.length; i++) {
+      const el = document.getElementById(SECTION_IDS[i]);
+      if (!el) continue;
+      const distance = Math.abs(el.offsetTop - probe);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = i;
+      }
+    }
+
+    setState({ progress: nextProgress, activeIndex: closestIndex });
+  }, []);
+
+  const scheduleUpdate = useCallback(() => {
+    if (rafRef.current) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = 0;
+      measure();
+    });
+  }, [measure]);
+
+  useEffect(() => {
+    measure();
+    window.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('resize', scheduleUpdate);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      window.removeEventListener('scroll', scheduleUpdate);
+      window.removeEventListener('resize', scheduleUpdate);
+    };
+  }, [measure, scheduleUpdate]);
+
+  return state;
+}
+
+// ─── Hook: useMouseSpotlight ──────────────────────────────────────────────────
+
+interface MouseSpotlight {
+  x: MotionValue<number>;
+  y: MotionValue<number>;
+}
+
+function useMouseSpotlight(): MouseSpotlight {
+  const mouseX = useMotionValue(0.5);
+  const mouseY = useMotionValue(0.4);
+  const x = useSpring(mouseX, SPRING_MOUSE);
+  const y = useSpring(mouseY, SPRING_MOUSE);
+
+  useEffect(() => {
+    const handleMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX / window.innerWidth);
+      mouseY.set(e.clientY / window.innerHeight);
+    };
+    window.addEventListener('mousemove', handleMove);
+    return () => window.removeEventListener('mousemove', handleMove);
+  }, [mouseX, mouseY]);
+
+  return { x, y };
+}
+
+// ─── Sub-components ──────────────────────────────────────────────────────────
+
+interface CursorGlowProps {
+  spotX: MotionValue<number>;
+  spotY: MotionValue<number>;
+}
+
+const CursorGlow = memo(function CursorGlow({ spotX, spotY }: CursorGlowProps) {
+  const bg = useTransform(
+    [spotX, spotY] as MotionValue[],
+    (values: number[]) => {
+      const [x = 0.5, y = 0.4] = values;
+      return `radial-gradient(ellipse 28rem 22rem at ${x * 100}% ${y * 100}%, rgba(160,218,255,0.11) 0%, rgba(120,180,255,0.05) 45%, transparent 70%)`;
+    },
+  );
+
+  return (
+    <motion.div
+      className="absolute inset-0 pointer-events-none will-change-[background]"
+      style={{ background: bg }}
+    />
+  );
+});
+
+interface WordSpanProps {
+  word: BackgroundWord;
+  index: number;
+}
+
+const WordSpan = memo(function WordSpan({ word, index }: WordSpanProps) {
+  const baseOpacity = word.layer === 1 ? 0.055 : word.layer === 2 ? 0.085 : 0.115;
+  const tintTemplate = CATEGORY_TINT[word.category];
+
+  return (
+    <span
+      className="absolute whitespace-nowrap select-none pointer-events-none"
+      style={{
+        top: `${word.top}%`,
+        left: `${word.left}%`,
+        fontSize: `${word.size}rem`,
+        transform: `rotate(${word.rotate}deg)`,
+        fontFamily: '"JetBrains Mono", "Fira Code", ui-monospace, monospace',
+        fontWeight: 500,
+        letterSpacing: '0.32em',
+        textTransform: 'uppercase',
+        color: `rgba(180, 210, 240, ${baseOpacity})`,
+        textShadow: `0 0 18px ${tintTemplate.replace('VAR', '0.02')}`,
+        animation: `word-drift-${index} ${word.duration}s ${word.delay}s ease-in-out infinite alternate`,
+        willChange: 'transform',
+        zIndex: word.layer,
+      }}
+    >
+      {word.label}
+    </span>
+  );
+});
+
+function useWordKeyframes() {
+  useEffect(() => {
+    const id = 'tech-word-keyframes';
+    if (document.getElementById(id)) return;
+
+    const rules = WORDS.map((word, index) => `
+      @keyframes word-drift-${index} {
+        from { transform: rotate(${word.rotate}deg) translate(0px, 0px); }
+        to { transform: rotate(${word.rotate + (word.driftX > 0 ? 1.5 : -1.5)}deg) translate(${word.driftX}px, ${word.driftY}px); }
+      }
+    `).join('\n');
+
+    const style = document.createElement('style');
+    style.id = id;
+    style.textContent = rules;
+    document.head.appendChild(style);
+
+    return () => {
+      document.getElementById(id)?.remove();
+    };
+  }, []);
+}
+
+interface TechWordFieldProps {
+  spotX: MotionValue<number>;
+  spotY: MotionValue<number>;
+}
+
+const TechWordField = memo(function TechWordField({ spotX, spotY }: TechWordFieldProps) {
+  useWordKeyframes();
+
+  return (
+    <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+      <div className="absolute inset-0">
+        {WORDS.map((word, index) => (
+          <WordSpan key={`${word.label}-${index}`} word={word} index={index} />
+        ))}
+      </div>
+      <div className="absolute inset-0" style={{ mixBlendMode: 'screen' }}>
+        <CursorGlow spotX={spotX} spotY={spotY} />
+      </div>
+    </div>
+  );
+});
+
+// ─── Sub-component: HUD (top bar) ─────────────────────────────────────────────
+
+interface HUDProps {
+  progress: number;
+  activeIndex: number;
+}
+
+const HUD = memo(function HUD({ progress, activeIndex }: HUDProps) {
+  const progressPercent = useMemo(() => padProgress(progress), [progress]);
+
+  return (
+    <div
+      role="status"
+      aria-label={`Page progress ${progressPercent}%`}
+      className="absolute inset-x-0 top-0 z-10 flex items-start justify-between px-6 py-6 text-[0.66rem] uppercase tracking-[0.32em] text-slate-400 md:px-10"
+    >
+      <div className="rounded-full border border-slate-300/10 bg-slate-950/20 px-3 py-2 backdrop-blur-xl select-none">
+        Siva Sudhamsh // Neural Interface
+      </div>
+      <div className="min-w-[10rem] rounded-2xl border border-slate-300/10 bg-slate-950/20 px-4 py-3 text-right backdrop-blur-xl">
+        <span aria-hidden="true">{progressPercent}%</span>
+        <div
+          role="progressbar"
+          aria-valuenow={Math.round(progress * 100)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          className="mt-2 h-px w-full overflow-hidden bg-slate-300/15"
+        >
+          <div
+            className="h-full bg-gradient-to-r from-sky-200 via-sky-400 to-slate-100 transition-[width] duration-150 ease-linear will-change-[width]"
+            style={{ width: `${progress * 100}%` }}
+          />
+        </div>
+        <div
+          aria-live="polite"
+          aria-atomic="true"
+          className="mt-2 text-[0.58rem] tracking-[0.35em] text-sky-200/90"
+        >
+          {SECTION_LABEL_LIST[activeIndex]}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+// ─── Sub-component: RobotLayer ─────────────────────────────────────────────────
+
+interface RobotLayerProps {
+  smoothProgress: MotionValue<number>;
+}
+
+const RobotLayer = memo(function RobotLayer({ smoothProgress }: RobotLayerProps) {
+  const scale  = useTransform(smoothProgress, [0, 1], [0.92, 1.26]);
+  const y      = useTransform(smoothProgress, [0, 1], [40, -110]);
+  const x      = useTransform(smoothProgress, [0, 1], [16, -24]);
+  const rotate = useTransform(smoothProgress, [0, 1], [-4, 3]);
+
+  return (
+    <motion.div
+      className="absolute right-[-3%] top-[7%] h-[82vh] w-[min(48rem,52vw)] min-w-[20rem] max-w-[56rem] will-change-transform"
+      style={{ scale, y, x, rotate, transformOrigin: '50% 60%' }}
+    >
+      {/* Ambient glow behind figure */}
+      <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_50%_44%,rgba(179,227,255,0.16),rgba(179,227,255,0)_54%)] blur-3xl" />
+      {/* Blurred ghost layer for depth */}
+      <div className="absolute inset-0 opacity-70 blur-[60px]" aria-hidden="true">
+        <RobotFigure />
+      </div>
+      {/* Sharp layer */}
+      <div className="absolute inset-0">
+        <RobotFigure />
+      </div>
+    </motion.div>
+  );
+});
+
+// ─── Main export ──────────────────────────────────────────────────────────────
 
 export function AnimatedBackground() {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const pausePlayBtnRef = useRef<HTMLButtonElement>(null);
+  const { progress, activeIndex } = useScrollState();
+  const spotlight = useMouseSpotlight();
 
-    const [isPaused, setIsPaused] = useState(false);
+  const scrollMotion = useMotionValue(0);
+  const smoothProgress = useSpring(scrollMotion, SPRING_SCROLL);
 
-    useEffect(() => {
-        if (typeof window === 'undefined' || !canvasRef.current) return;
+  // Keep scroll motion value in sync with derived progress state
+  useEffect(() => {
+    scrollMotion.set(progress);
+  }, [progress, scrollMotion]);
 
-        const config = {
-            paused: false,
-            activePaletteIndex: 2,
-            currentFormation: 0,
-            numFormations: 3,
-            densityFactor: 1
-        };
+  const spotlightBackground = useTransform(
+    [spotlight.x, spotlight.y] as MotionValue[],
+    (values: number[]) => {
+      const [x = 0.5, y = 0.4] = values;
+      return `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(132,207,255,0.18), rgba(132,207,255,0) 28%)`;
+    },
+  );
 
-        const colorPalettes = [
-            [
-                new THREE.Color(0x667eea),
-                new THREE.Color(0x764ba2),
-                new THREE.Color(0xf093fb),
-                new THREE.Color(0x9d50bb),
-                new THREE.Color(0x6e48aa)
-            ],
-            [
-                new THREE.Color(0xf857a6),
-                new THREE.Color(0xff5858),
-                new THREE.Color(0xfeca57),
-                new THREE.Color(0xff6348),
-                new THREE.Color(0xff9068)
-            ],
-            [
-                new THREE.Color(0x4facfe),
-                new THREE.Color(0x00f2fe),
-                new THREE.Color(0x43e97b),
-                new THREE.Color(0x38f9d7),
-                new THREE.Color(0x4484ce)
-            ]
-        ];
+  const hazeOpacity = useTransform(smoothProgress, [0, 0.55, 1], [0.18, 0.28, 0.36]);
+  const ringScale   = useTransform(smoothProgress, [0, 1], [0.88, 1.16]);
 
-        const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x000000, 0.002);
-        const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 8, 28);
+  return (
+    <div
+      className="pointer-events-none fixed inset-0 z-[-1] overflow-hidden bg-[#030812]"
+      aria-hidden="true"
+    >
+      {/* Base gradient */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(86,146,196,0.24),transparent_36%),linear-gradient(160deg,#071120_0%,#030812_45%,#08111d_100%)]" />
 
-        const renderer = new THREE.WebGLRenderer({
-            canvas: canvasRef.current,
-            antialias: true,
-            powerPreference: "high-performance"
-        });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.setClearColor(0x000000);
-        renderer.outputColorSpace = THREE.SRGBColorSpace;
-        
-        function createStarfield() {
-            const count = 8000;
-            const positions = [];
-            const colors = [];
-            const sizes = [];
-            for (let i = 0; i < count; i++) {
-                const r = THREE.MathUtils.randFloat(50, 150);
-                const phi = Math.acos(THREE.MathUtils.randFloatSpread(2));
-                const theta = THREE.MathUtils.randFloat(0, Math.PI * 2);
-                positions.push(
-                    r * Math.sin(phi) * Math.cos(theta),
-                    r * Math.sin(phi) * Math.sin(theta),
-                    r * Math.cos(phi)
-                );
-                const colorChoice = Math.random();
-                if (colorChoice < 0.7) {
-                    colors.push(1, 1, 1);
-                } else if (colorChoice < 0.85) {
-                    colors.push(0.7, 0.8, 1);
-                } else {
-                    colors.push(1, 0.9, 0.8);
-                }
-                sizes.push(THREE.MathUtils.randFloat(0.1, 0.3));
-            }
-            const geo = new THREE.BufferGeometry();
-            geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-            geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-            geo.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
-            const mat = new THREE.ShaderMaterial({
-                uniforms: {
-                    uTime: { value: 0 }
-                },
-                vertexShader: `
-                    attribute float size;
-                    attribute vec3 color;
-                    varying vec3 vColor;
-                    uniform float uTime;
-                    void main() {
-                        vColor = color;
-                        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-                        float twinkle = sin(uTime * 2.0 + position.x * 100.0) * 0.3 + 0.7;
-                        gl_PointSize = size * twinkle * (300.0 / -mvPosition.z);
-                        gl_Position = projectionMatrix * mvPosition;
-                    }
-                `,
-                fragmentShader: `
-                    varying vec3 vColor;
-                    void main() {
-                        vec2 center = gl_PointCoord - 0.5;
-                        float dist = length(center);
-                        if (dist > 0.5) discard;
-                        float alpha = 1.0 - smoothstep(0.0, 0.5, dist);
-                        gl_FragColor = vec4(vColor, alpha * 0.8);
-                    }
-                `,
-                transparent: true,
-                depthWrite: false,
-                blending: THREE.AdditiveBlending
-            });
-            return new THREE.Points(geo, mat);
-        }
-        const starField = createStarfield();
-        scene.add(starField);
+      {/* Mouse spotlight */}
+      <motion.div className="absolute inset-0 will-change-[background]" style={{ background: spotlightBackground }} />
 
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.rotateSpeed = 0.6;
-        controls.minDistance = 8;
-        controls.maxDistance = 80;
-        controls.autoRotate = true;
-        controls.autoRotateSpeed = 0.2;
-        controls.enablePan = false;
+      {/* Subtle grid */}
+      <div className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(rgba(220,235,248,0.17)_1px,transparent_1px),linear-gradient(90deg,rgba(164,184,204,0.12)_1px,transparent_1px)] [background-size:92px_92px]" />
 
-        const composer = new EffectComposer(renderer);
-        composer.addPass(new RenderPass(scene, camera));
-        const bloomPass = new UnrealBloomPass(
-            new THREE.Vector2(window.innerWidth, window.innerHeight),
-            1.8,
-            0.6,
-            0.7
-        );
-        composer.addPass(bloomPass);
-        composer.addPass(new OutputPass());
+      {/* Cursor-reactive ML word field */}
+      <TechWordField spotX={spotlight.x} spotY={spotlight.y} />
 
-        const pulseUniforms = {
-            uTime: { value: 0.0 },
-            uPulsePositions: { value: [
-                new THREE.Vector3(1e3, 1e3, 1e3),
-                new THREE.Vector3(1e3, 1e3, 1e3),
-                new THREE.Vector3(1e3, 1e3, 1e3)
-            ]},
-            uPulseTimes: { value: [-1e3, -1e3, -1e3] },
-            uPulseColors: { value: [
-                new THREE.Color(1, 1, 1),
-                new THREE.Color(1, 1, 1),
-                new THREE.Color(1, 1, 1)
-            ]},
-            uPulseSpeed: { value: 18.0 },
-            uBaseNodeSize: { value: 0.6 }
-        };
+      {/* Bottom vignette */}
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_0%,rgba(1,6,11,0.28)_44%,rgba(1,6,11,0.62)_100%)]" />
 
-        const noiseFunctions = `
-        vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-        vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-        vec4 permute(vec4 x) { return mod289(((x * 34.0) + 1.0) * x); }
-        vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-        
-        float snoise(vec3 v) {
-            const vec2 C = vec2(1.0/6.0, 1.0/3.0);
-            const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
-            vec3 i = floor(v + dot(v, C.yyy));
-            vec3 x0 = v - i + dot(i, C.xxx);
-            vec3 g = step(x0.yzx, x0.xyz);
-            vec3 l = 1.0 - g;
-            vec3 i1 = min(g.xyz, l.zxy);
-            vec3 i2 = max(g.xyz, l.zxy);
-            vec3 x1 = x0 - i1 + C.xxx;
-            vec3 x2 = x0 - i2 + C.yyy;
-            vec3 x3 = x0 - D.yyy;
-            i = mod289(i);
-            vec4 p = permute(permute(permute(
-                i.z + vec4(0.0, i1.z, i2.z, 1.0))
-                + i.y + vec4(0.0, i1.y, i2.y, 1.0))
-                + i.x + vec4(0.0, i1.x, i2.x, 1.0));
-            float n_ = 0.142857142857;
-            vec3 ns = n_ * D.wyz - D.xzx;
-            vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-            vec4 x_ = floor(j * ns.z);
-            vec4 y_ = floor(j - 7.0 * x_);
-            vec4 x = x_ * ns.x + ns.yyyy;
-            vec4 y = y_ * ns.x + ns.yyyy;
-            vec4 h = 1.0 - abs(x) - abs(y);
-            vec4 b0 = vec4(x.xy, y.xy);
-            vec4 b1 = vec4(x.zw, y.zw);
-            vec4 s0 = floor(b0) * 2.0 + 1.0;
-            vec4 s1 = floor(b1) * 2.0 + 1.0;
-            vec4 sh = -step(h, vec4(0.0));
-            vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
-            vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
-            vec3 p0 = vec3(a0.xy, h.x);
-            vec3 p1 = vec3(a0.zw, h.y);
-            vec3 p2 = vec3(a1.xy, h.z);
-            vec3 p3 = vec3(a1.zw, h.w);
-            vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
-            p0 *= norm.x;
-            p1 *= norm.y;
-            p2 *= norm.z;
-            p3 *= norm.w;
-            vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-            m = m * m;
-            return 42.0 * dot(m * m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
-        }`;
+      {/* Parallax orbit rings */}
+      <motion.div
+        className="absolute left-1/2 top-1/2 h-[70rem] w-[70rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-sky-200/10 will-change-transform"
+        style={{ scale: ringScale }}
+      >
+        <div className="absolute inset-[9%]  rounded-full border border-sky-100/10" />
+        <div className="absolute inset-[19%] rounded-full border border-blue-200/10" />
+        <div className="absolute inset-[31%] rounded-full border border-slate-200/10" />
+      </motion.div>
 
-        const nodeShader = {
-            vertexShader: `${noiseFunctions}
-            attribute float nodeSize;
-            attribute float nodeType;
-            attribute vec3 nodeColor;
-            attribute float distanceFromRoot;
-            
-            uniform float uTime;
-            uniform vec3 uPulsePositions[3];
-            uniform float uPulseTimes[3];
-            uniform float uPulseSpeed;
-            uniform float uBaseNodeSize;
-            
-            varying vec3 vColor;
-            varying float vNodeType;
-            varying vec3 vPosition;
-            varying float vPulseIntensity;
-            varying float vDistanceFromRoot;
-            varying float vGlow;
-            float getPulseIntensity(vec3 worldPos, vec3 pulsePos, float pulseTime) {
-                if (pulseTime < 0.0) return 0.0;
-                float timeSinceClick = uTime - pulseTime;
-                if (timeSinceClick < 0.0 || timeSinceClick > 4.0) return 0.0;
-                float pulseRadius = timeSinceClick * uPulseSpeed;
-                float distToClick = distance(worldPos, pulsePos);
-                float pulseThickness = 3.0;
-                float waveProximity = abs(distToClick - pulseRadius);
-                return smoothstep(pulseThickness, 0.0, waveProximity) * smoothstep(4.0, 0.0, timeSinceClick);
-            }
-            void main() {
-                vNodeType = nodeType;
-                vColor = nodeColor;
-                vDistanceFromRoot = distanceFromRoot;
-                vec3 worldPos = (modelMatrix * vec4(position, 1.0)).xyz;
-                vPosition = worldPos;
-                float totalPulseIntensity = 0.0;
-                for (int i = 0; i < 3; i++) {
-                    totalPulseIntensity += getPulseIntensity(worldPos, uPulsePositions[i], uPulseTimes[i]);
-                }
-                vPulseIntensity = min(totalPulseIntensity, 1.0);
-                float breathe = sin(uTime * 0.7 + distanceFromRoot * 0.15) * 0.15 + 0.85;
-                float baseSize = nodeSize * breathe;
-                float pulseSize = baseSize * (1.0 + vPulseIntensity * 2.5);
-                vGlow = 0.5 + 0.5 * sin(uTime * 0.5 + distanceFromRoot * 0.2);
-                vec3 modifiedPosition = position;
-                if (nodeType > 0.5) {
-                    float noise = snoise(position * 0.08 + uTime * 0.08);
-                    modifiedPosition += normal * noise * 0.15;
-                }
-                vec4 mvPosition = modelViewMatrix * vec4(modifiedPosition, 1.0);
-                gl_PointSize = pulseSize * uBaseNodeSize * (1000.0 / -mvPosition.z);
-                gl_Position = projectionMatrix * mvPosition;
-            }`,
-            fragmentShader: `
-            uniform float uTime;
-            uniform vec3 uPulseColors[3];
-            
-            varying vec3 vColor;
-            varying float vNodeType;
-            varying vec3 vPosition;
-            varying float vPulseIntensity;
-            varying float vDistanceFromRoot;
-            varying float vGlow;
-            void main() {
-                vec2 center = 2.0 * gl_PointCoord - 1.0;
-                float dist = length(center);
-                if (dist > 1.0) discard;
-                float glow1 = 1.0 - smoothstep(0.0, 0.5, dist);
-                float glow2 = 1.0 - smoothstep(0.0, 1.0, dist);
-                float glowStrength = pow(glow1, 1.2) + glow2 * 0.3;
-                float breatheColor = 0.9 + 0.1 * sin(uTime * 0.6 + vDistanceFromRoot * 0.25);
-                vec3 baseColor = vColor * breatheColor;
-                vec3 finalColor = baseColor;
-                if (vPulseIntensity > 0.0) {
-                    vec3 pulseColor = mix(vec3(1.0), uPulseColors[0], 0.4);
-                    finalColor = mix(baseColor, pulseColor, vPulseIntensity * 0.8);
-                    finalColor *= (1.0 + vPulseIntensity * 1.2);
-                    glowStrength *= (1.0 + vPulseIntensity);
-                }
-                float coreBrightness = smoothstep(0.4, 0.0, dist);
-                finalColor += vec3(1.0) * coreBrightness * 0.3;
-                float alpha = glowStrength * (0.95 - 0.3 * dist);
-                float camDistance = length(vPosition - cameraPosition);
-                float distanceFade = smoothstep(100.0, 15.0, camDistance);
-                if (vNodeType > 0.5) {
-                    finalColor *= 1.1;
-                    alpha *= 0.9;
-                }
-                finalColor *= (1.0 + vGlow * 0.1);
-                gl_FragColor = vec4(finalColor, alpha * distanceFade);
-            }`
-        };
-        const connectionShader = {
-            vertexShader: `${noiseFunctions}
-            attribute vec3 startPoint;
-            attribute vec3 endPoint;
-            attribute float connectionStrength;
-            attribute float pathIndex;
-            attribute vec3 connectionColor;
-            
-            uniform float uTime;
-            uniform vec3 uPulsePositions[3];
-            uniform float uPulseTimes[3];
-            uniform float uPulseSpeed;
-            
-            varying vec3 vColor;
-            varying float vConnectionStrength;
-            varying float vPulseIntensity;
-            varying float vPathPosition;
-            varying float vDistanceFromCamera;
-            float getPulseIntensity(vec3 worldPos, vec3 pulsePos, float pulseTime) {
-                if (pulseTime < 0.0) return 0.0;
-                float timeSinceClick = uTime - pulseTime;
-                if (timeSinceClick < 0.0 || timeSinceClick > 4.0) return 0.0;
-                
-                float pulseRadius = timeSinceClick * uPulseSpeed;
-                float distToClick = distance(worldPos, pulsePos);
-                float pulseThickness = 3.0;
-                float waveProximity = abs(distToClick - pulseRadius);
-                
-                return smoothstep(pulseThickness, 0.0, waveProximity) * smoothstep(4.0, 0.0, timeSinceClick);
-            }
-            void main() {
-                float t = position.x;
-                vPathPosition = t;
-                vec3 midPoint = mix(startPoint, endPoint, 0.5);
-                float pathOffset = sin(t * 3.14159) * 0.15;
-                vec3 perpendicular = normalize(cross(normalize(endPoint - startPoint), vec3(0.0, 1.0, 0.0)));
-                if (length(perpendicular) < 0.1) perpendicular = vec3(1.0, 0.0, 0.0);
-                midPoint += perpendicular * pathOffset;
-                vec3 p0 = mix(startPoint, midPoint, t);
-                vec3 p1 = mix(midPoint, endPoint, t);
-                vec3 finalPos = mix(p0, p1, t);
-                float noiseTime = uTime * 0.15;
-                float noise = snoise(vec3(pathIndex * 0.08, t * 0.6, noiseTime));
-                finalPos += perpendicular * noise * 0.12;
-                vec3 worldPos = (modelMatrix * vec4(finalPos, 1.0)).xyz;
-                float totalPulseIntensity = 0.0;
-                for (int i = 0; i < 3; i++) {
-                    totalPulseIntensity += getPulseIntensity(worldPos, uPulsePositions[i], uPulseTimes[i]);
-                }
-                vPulseIntensity = min(totalPulseIntensity, 1.0);
-                vColor = connectionColor;
-                vConnectionStrength = connectionStrength;
-                
-                vDistanceFromCamera = length(worldPos - cameraPosition);
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(finalPos, 1.0);
-            }`,
-            fragmentShader: `
-            uniform float uTime;
-            uniform vec3 uPulseColors[3];
-            
-            varying vec3 vColor;
-            varying float vConnectionStrength;
-            varying float vPulseIntensity;
-            varying float vPathPosition;
-            varying float vDistanceFromCamera;
-            void main() {
-                float flowPattern1 = sin(vPathPosition * 25.0 - uTime * 4.0) * 0.5 + 0.5;
-                float flowPattern2 = sin(vPathPosition * 15.0 - uTime * 2.5 + 1.57) * 0.5 + 0.5;
-                float combinedFlow = (flowPattern1 + flowPattern2 * 0.5) / 1.5;
-                
-                vec3 baseColor = vColor * (0.8 + 0.2 * sin(uTime * 0.6 + vPathPosition * 12.0));
-                float flowIntensity = 0.4 * combinedFlow * vConnectionStrength;
-                vec3 finalColor = baseColor;
-                if (vPulseIntensity > 0.0) {
-                    vec3 pulseColor = mix(vec3(1.0), uPulseColors[0], 0.3);
-                    finalColor = mix(baseColor, pulseColor * 1.2, vPulseIntensity * 0.7);
-                    flowIntensity += vPulseIntensity * 0.8;
-                }
-                finalColor *= (0.7 + flowIntensity + vConnectionStrength * 0.5);
-                float baseAlpha = 0.7 * vConnectionStrength;
-                float flowAlpha = combinedFlow * 0.3;
-                float alpha = baseAlpha + flowAlpha;
-                alpha = mix(alpha, min(1.0, alpha * 2.5), vPulseIntensity);
-                float distanceFade = smoothstep(100.0, 15.0, vDistanceFromCamera);
-                gl_FragColor = vec4(finalColor, alpha * distanceFade);
-            }`
-        };
+      {/* Central haze */}
+      <motion.div
+        className="absolute left-1/2 top-[56%] h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(80,175,255,0.28),rgba(80,175,255,0)_65%)] blur-3xl will-change-[opacity]"
+        style={{ opacity: hazeOpacity }}
+      />
 
-        class Node {
-            position: THREE.Vector3;
-            connections: { node: Node, strength: number }[];
-            level: number;
-            type: number; // 0 for core, 1 for leaf
-            size: number;
-            distanceFromRoot: number;
-            helixIndex?: number;
-            helixT?: number;
+      {/* Robot figure */}
+      <RobotLayer smoothProgress={smoothProgress} />
 
-            constructor(position: THREE.Vector3, level = 0, type = 0) {
-                this.position = position;
-                this.connections = [];
-                this.level = level;
-                this.type = type;
-                this.size = type === 0 ? THREE.MathUtils.randFloat(0.8, 1.4) : THREE.MathUtils.randFloat(0.5, 1.0);
-                this.distanceFromRoot = 0;
-            }
-            addConnection(node: Node, strength = 1.0) {
-                if (!this.isConnectedTo(node)) {
-                    this.connections.push({ node, strength });
-                    node.connections.push({ node: this, strength });
-                }
-            }
-            isConnectedTo(node: Node) {
-                return this.connections.some(conn => conn.node === node);
-            }
-        }
+      {/* Floating ambient orb */}
+      <motion.div
+        className="absolute left-[8%] top-[18%] h-48 w-48 rounded-full bg-[radial-gradient(circle_at_center,rgba(220,236,248,0.18),rgba(220,236,248,0)_72%)] blur-3xl"
+        animate={ORB_ANIMATION}
+        transition={ORB_TRANSITION}
+      />
 
-        let neuralNetwork: { nodes: Node[], rootNode: Node | null } | null = null;
-        let nodesMesh: THREE.Points | null = null;
-        let connectionsMesh: THREE.LineSegments | null = null;
+      {/* Animated scan line */}
+      <motion.div
+        className="absolute bottom-[14%] left-[10%] h-px w-[20rem] bg-gradient-to-r from-transparent via-sky-200/45 to-transparent"
+        animate={SCAN_LINE_ANIMATION}
+        transition={SCAN_LINE_TRANSITION}
+      />
 
-        function generateNeuralNetwork(formationIndex: number, densityFactor = 1.0) {
-            let nodes: Node[] = [];
-            let rootNode: Node | null = null;
-            function generateCrystallineSphere() {
-                rootNode = new Node(new THREE.Vector3(0, 0, 0), 0, 0);
-                rootNode.size = 2.0;
-                nodes.push(rootNode);
-                const layers = 5;
-                const goldenRatio = (1 + Math.sqrt(5)) / 2;
-                for (let layer = 1; layer <= layers; layer++) {
-                    const radius = layer * 4;
-                    const numPoints = Math.floor(layer * 12 * densityFactor);
-                    for (let i = 0; i < numPoints; i++) {
-                        const phi = Math.acos(1 - 2 * (i + 0.5) / numPoints);
-                        const theta = 2 * Math.PI * i / goldenRatio;
-                        const pos = new THREE.Vector3(
-                            radius * Math.sin(phi) * Math.cos(theta),
-                            radius * Math.sin(phi) * Math.sin(theta),
-                            radius * Math.cos(phi)
-                        );
-                        const isLeaf = layer === layers || Math.random() < 0.3;
-                        const node = new Node(pos, layer, isLeaf ? 1 : 0);
-                        node.distanceFromRoot = radius;
-                        nodes.push(node);
-                        if (layer > 1) {
-                            const prevLayerNodes = nodes.filter(n => n.level === layer - 1 && n !== rootNode);
-                            prevLayerNodes.sort((a, b) =>
-                                pos.distanceTo(a.position) - pos.distanceTo(b.position)
-                            );
-                            for (let j = 0; j < Math.min(3, prevLayerNodes.length); j++) {
-                                const dist = pos.distanceTo(prevLayerNodes[j].position);
-                                const strength = 1.0 - (dist / (radius * 2));
-                                node.addConnection(prevLayerNodes[j], Math.max(0.3, strength));
-                            }
-                        } else {
-                            rootNode.addConnection(node, 0.9);
-                        }
-                    }
-                    const layerNodes = nodes.filter(n => n.level === layer && n !== rootNode);
-                    for (let i = 0; i < layerNodes.length; i++) {
-                        const node = layerNodes[i];
-                        const nearby = layerNodes.filter(n => n !== node)
-                            .sort((a, b) =>
-                                node.position.distanceTo(a.position) - node.position.distanceTo(b.position)
-                            ).slice(0, 5);
-                        for (const nearNode of nearby) {
-                            const dist = node.position.distanceTo(nearNode.position);
-                            if (dist < radius * 0.8 && !node.isConnectedTo(nearNode)) {
-                                node.addConnection(nearNode, 0.6);
-                            }
-                        }
-                    }
-                }
-                const outerNodes = nodes.filter(n => n.level >= 3);
-                for (let i = 0; i < Math.min(20, outerNodes.length); i++) {
-                    const n1 = outerNodes[Math.floor(Math.random() * outerNodes.length)];
-                    const n2 = outerNodes[Math.floor(Math.random() * outerNodes.length)];
-                    if (n1 !== n2 && !n1.isConnectedTo(n2) &&
-                        Math.abs(n1.level - n2.level) > 1) {
-                        n1.addConnection(n2, 0.4);
-                    }
-                }
-            }
-            function generateHelixLattice() {
-                rootNode = new Node(new THREE.Vector3(0, 0, 0), 0, 0);
-                rootNode.size = 1.8;
-                nodes.push(rootNode);
-                const numHelices = 4;
-                const height = 30;
-                const maxRadius = 12;
-                const nodesPerHelix = Math.floor(50 * densityFactor);
-                const helixArrays: Node[][] = [];
-                for (let h = 0; h < numHelices; h++) {
-                    const helixPhase = (h / numHelices) * Math.PI * 2;
-                    const helixNodes = [];
-                    for (let i = 0; i < nodesPerHelix; i++) {
-                        const t = i / (nodesPerHelix - 1);
-                        const y = (t - 0.5) * height;
-                        const radiusScale = Math.sin(t * Math.PI) * 0.7 + 0.3;
-                        const radius = maxRadius * radiusScale;
-                        const angle = helixPhase + t * Math.PI * 6;
-                        const pos = new THREE.Vector3(
-                            radius * Math.cos(angle),
-                            y,
-                            radius * Math.sin(angle)
-                        );
-                        const level = Math.ceil(t * 5);
-                        const isLeaf = i > nodesPerHelix - 5 || Math.random() < 0.25;
-                        const node = new Node(pos, level, isLeaf ? 1 : 0);
-                        node.distanceFromRoot = Math.sqrt(radius * radius + y * y);
-                        node.helixIndex = h;
-                        node.helixT = t;
-                        nodes.push(node);
-                        helixNodes.push(node);
-                    }
-                    helixArrays.push(helixNodes);
-                    rootNode.addConnection(helixNodes[0], 1.0);
-                    for (let i = 0; i < helixNodes.length - 1; i++) {
-                        helixNodes[i].addConnection(helixNodes[i + 1], 0.85);
-                    }
-                }
-                for (let h = 0; h < numHelices; h++) {
-                    const currentHelix = helixArrays[h];
-                    const nextHelix = helixArrays[(h + 1) % numHelices];
-                    for (let i = 0; i < currentHelix.length; i += 5) {
-                        const t = currentHelix[i].helixT!;
-                        const targetIdx = Math.round(t * (nextHelix.length - 1));
-                        if (targetIdx < nextHelix.length) {
-                            currentHelix[i].addConnection(nextHelix[targetIdx], 0.7);
-                        }
-                    }
-                }
-                for (const helix of helixArrays) {
-                    for (let i = 0; i < helix.length; i += 8) {
-                        const node = helix[i];
-                        if (!rootNode) continue;
-                        const innerNodes = nodes.filter(n =>
-                            n !== node &&
-                            n !== rootNode &&
-                            n.distanceFromRoot < node.distanceFromRoot * 0.5
-                        );
-                        if (innerNodes.length > 0) {
-                            const nearest = innerNodes.sort((a, b) =>
-                                node.position.distanceTo(a.position) - node.position.distanceTo(b.position)
-                            )[0];
-                            node.addConnection(nearest, 0.5);
-                        }
-                    }
-                }
-                if (!rootNode) return { nodes, rootNode };
-                const allHelixNodes = nodes.filter(n => n !== rootNode);
-                for (let i = 0; i < Math.floor(30 * densityFactor); i++) {
-                    const n1 = allHelixNodes[Math.floor(Math.random() * allHelixNodes.length)];
-                    const nearby = allHelixNodes.filter(n => {
-                        const dist = n.position.distanceTo(n1.position);
-                        return n !== n1 && dist < 8 && dist > 3 && !n1.isConnectedTo(n);
-                    });
-                    if (nearby.length > 0) {
-                        const n2 = nearby[Math.floor(Math.random() * nearby.length)];
-                        n1.addConnection(n2, 0.45);
-                    }
-                }
-            }
-            function generateFractalWeb() {
-                rootNode = new Node(new THREE.Vector3(0, 0, 0), 0, 0);
-                rootNode.size = 1.6;
-                nodes.push(rootNode);
-                const branches = 6;
-                const maxDepth = 4;
-                function createBranch(startNode: Node, direction: THREE.Vector3, depth: number, strength: number, scale: number) {
-                    if (depth > maxDepth || !rootNode) return;
-                    const branchLength = 5 * scale;
-                    const endPos = new THREE.Vector3()
-                        .copy(startNode.position)
-                        .add(direction.clone().multiplyScalar(branchLength));
-                    const isLeaf = depth === maxDepth || Math.random() < 0.3;
-                    const newNode = new Node(endPos, depth, isLeaf ? 1 : 0);
-                    newNode.distanceFromRoot = rootNode.position.distanceTo(endPos);
-                    nodes.push(newNode);
-                    startNode.addConnection(newNode, strength);
-                    if (depth < maxDepth) {
-                        const subBranches = 3;
-                        for (let i = 0; i < subBranches; i++) {
-                            const angle = (i / subBranches) * Math.PI * 2;
-                            const perpDir1 = new THREE.Vector3(-direction.y, direction.x, 0).normalize();
-                            const perpDir2 = direction.clone().cross(perpDir1).normalize();
-                            const newDir = new THREE.Vector3()
-                                .copy(direction)
-                                .add(perpDir1.clone().multiplyScalar(Math.cos(angle) * 0.7))
-                                .add(perpDir2.clone().multiplyScalar(Math.sin(angle) * 0.7))
-                                .normalize();
-                            createBranch(newNode, newDir, depth + 1, strength * 0.7, scale * 0.75);
-                        }
-                    }
-                }
-                for (let i = 0; i < branches; i++) {
-                    const phi = Math.acos(1 - 2 * (i + 0.5) / branches);
-                    const theta = Math.PI * (1 + Math.sqrt(5)) * i;
-                    const direction = new THREE.Vector3(
-                        Math.sin(phi) * Math.cos(theta),
-                        Math.sin(phi) * Math.sin(theta),
-                        Math.cos(phi)
-                    ).normalize();
-                    createBranch(rootNode, direction, 1, 0.9, 1.0);
-                }
-                const leafNodes = nodes.filter(n => n.level >= 2);
-                for (let i = 0; i < leafNodes.length; i++) {
-                    const node = leafNodes[i];
-                    const nearby = leafNodes.filter(n => {
-                        const dist = n.position.distanceTo(node.position);
-                        return n !== node && dist < 10 && !node.isConnectedTo(n);
-                    }).sort((a, b) =>
-                        node.position.distanceTo(a.position) - node.position.distanceTo(b.position)
-                    ).slice(0, 3);
-                    for (const nearNode of nearby) {
-                        if (Math.random() < 0.5 * densityFactor) {
-                            node.addConnection(nearNode, 0.5);
-                        }
-                    }
-                }
-                const midLevelNodes = nodes.filter(n => n.level >= 2 && n.level <= 3);
-                for (const node of midLevelNodes) {
-                    if (Math.random() < 0.3) {
-                        const innerNodes = nodes.filter(n =>
-                            n !== node &&
-                            n.distanceFromRoot < node.distanceFromRoot * 0.6
-                        );
-                        if (innerNodes.length > 0) {
-                            const target = innerNodes[Math.floor(Math.random() * innerNodes.length)];
-                            if (!node.isConnectedTo(target)) {
-                                node.addConnection(target, 0.4);
-                            }
-                        }
-                    }
-                }
-            }
-            switch (formationIndex % 3) {
-                case 0: generateCrystallineSphere(); break;
-                case 1: generateHelixLattice(); break;
-                case 2: generateFractalWeb(); break;
-            }
-            if (densityFactor < 1.0) {
-                const targetCount = Math.ceil(nodes.length * Math.max(0.3, densityFactor));
-                if (rootNode) {
-                    const toKeep = new Set([rootNode]);
-                    const sortedNodes = nodes.filter(n => n !== rootNode)
-                        .sort((a, b) => {
-                            const scoreA = a.connections.length * (1 / (a.distanceFromRoot + 1));
-                            const scoreB = b.connections.length * (1 / (b.distanceFromRoot + 1));
-                            return scoreB - scoreA;
-                        });
-                    for (let i = 0; i < Math.min(targetCount - 1, sortedNodes.length); i++) {
-                        toKeep.add(sortedNodes[i]);
-                    }
-                    nodes = nodes.filter(n => toKeep.has(n));
-                    nodes.forEach(node => {
-                        node.connections = node.connections.filter(conn => toKeep.has(conn.node));
-                    });
-                }
-            }
-            return { nodes, rootNode };
-        }
+      {/* Film grain */}
+      <div
+        className="absolute inset-0 opacity-[0.04] mix-blend-screen"
+        style={{ backgroundImage: NOISE_SVG }}
+      />
 
-        function createNetworkVisualization(formationIndex: number, densityFactor = 1.0) {
-            if (nodesMesh) {
-                scene.remove(nodesMesh);
-                nodesMesh.geometry.dispose();
-                (nodesMesh.material as THREE.ShaderMaterial).dispose();
-            }
-            if (connectionsMesh) {
-                scene.remove(connectionsMesh);
-                connectionsMesh.geometry.dispose();
-                (connectionsMesh.material as THREE.ShaderMaterial).dispose();
-            }
-            neuralNetwork = generateNeuralNetwork(formationIndex, densityFactor);
-            if (!neuralNetwork || neuralNetwork.nodes.length === 0) {
-                console.error("Network generation failed");
-                return;
-            }
-            const nodesGeometry = new THREE.BufferGeometry();
-            const nodePositions = [];
-            const nodeTypes = [];
-            const nodeSizes = [];
-            const nodeColors = [];
-            const distancesFromRoot = [];
-            const palette = colorPalettes[config.activePaletteIndex];
-            neuralNetwork.nodes.forEach((node) => {
-                nodePositions.push(node.position.x, node.position.y, node.position.z);
-                nodeTypes.push(node.type);
-                nodeSizes.push(node.size);
-                distancesFromRoot.push(node.distanceFromRoot);
-                const colorIndex = Math.min(node.level, palette.length - 1);
-                const baseColor = palette[colorIndex % palette.length].clone();
-                baseColor.offsetHSL(
-                    THREE.MathUtils.randFloatSpread(0.03),
-                    THREE.MathUtils.randFloatSpread(0.08),
-                    THREE.MathUtils.randFloatSpread(0.08)
-                );
-                nodeColors.push(baseColor.r, baseColor.g, baseColor.b);
-            });
-            nodesGeometry.setAttribute('position', new THREE.Float32BufferAttribute(nodePositions, 3));
-            nodesGeometry.setAttribute('nodeType', new THREE.Float32BufferAttribute(nodeTypes, 1));
-            nodesGeometry.setAttribute('nodeSize', new THREE.Float32BufferAttribute(nodeSizes, 1));
-            nodesGeometry.setAttribute('nodeColor', new THREE.Float32BufferAttribute(nodeColors, 3));
-            nodesGeometry.setAttribute('distanceFromRoot', new THREE.Float32BufferAttribute(distancesFromRoot, 1));
-            const nodesMaterial = new THREE.ShaderMaterial({
-                uniforms: THREE.UniformsUtils.clone(pulseUniforms),
-                vertexShader: nodeShader.vertexShader,
-                fragmentShader: nodeShader.fragmentShader,
-                transparent: true,
-                depthWrite: false,
-                blending: THREE.AdditiveBlending
-            });
-            nodesMesh = new THREE.Points(nodesGeometry, nodesMaterial);
-            scene.add(nodesMesh);
-            const connectionsGeometry = new THREE.BufferGeometry();
-            const connectionColors: number[] = [];
-            const connectionStrengths: number[] = [];
-            const connectionPositions: number[] = [];
-            const startPoints: number[] = [];
-            const endPoints: number[] = [];
-            const pathIndices: number[] = [];
-            const processedConnections = new Set();
-            let pathIndex = 0;
-            neuralNetwork.nodes.forEach((node, nodeIndex) => {
-                node.connections.forEach(connection => {
-                    const connectedNode = connection.node;
-                    const connectedIndex = neuralNetwork!.nodes.indexOf(connectedNode);
-                    if (connectedIndex === -1) return;
-                    const key = [Math.min(nodeIndex, connectedIndex), Math.max(nodeIndex, connectedIndex)].join('-');
-                    if (!processedConnections.has(key)) {
-                        processedConnections.add(key);
-                        const startPoint = node.position;
-                        const endPoint = connectedNode.position;
-                        const numSegments = 20;
-                        for (let i = 0; i < numSegments; i++) {
-                            const t = i / (numSegments - 1);
-                            connectionPositions.push(t, 0, 0);
-                            startPoints.push(startPoint.x, startPoint.y, startPoint.z);
-                            endPoints.push(endPoint.x, endPoint.y, endPoint.z);
-                            pathIndices.push(pathIndex);
-                            connectionStrengths.push(connection.strength);
-                            const avgLevel = Math.min(Math.floor((node.level + connectedNode.level) / 2), palette.length - 1);
-                            const baseColor = palette[avgLevel % palette.length].clone();
-                            baseColor.offsetHSL(
-                                THREE.MathUtils.randFloatSpread(0.03),
-                                THREE.MathUtils.randFloatSpread(0.08),
-                                THREE.MathUtils.randFloatSpread(0.08)
-                            );
-                            connectionColors.push(baseColor.r, baseColor.g, baseColor.b);
-                        }
-                        pathIndex++;
-                    }
-                });
-            });
-            connectionsGeometry.setAttribute('position', new THREE.Float32BufferAttribute(connectionPositions, 3));
-            connectionsGeometry.setAttribute('startPoint', new THREE.Float32BufferAttribute(startPoints, 3));
-            connectionsGeometry.setAttribute('endPoint', new THREE.Float32BufferAttribute(endPoints, 3));
-            connectionsGeometry.setAttribute('connectionStrength', new THREE.Float32BufferAttribute(connectionStrengths, 1));
-            connectionsGeometry.setAttribute('connectionColor', new THREE.Float32BufferAttribute(connectionColors, 3));
-            connectionsGeometry.setAttribute('pathIndex', new THREE.Float32BufferAttribute(pathIndices, 1));
-            const connectionsMaterial = new THREE.ShaderMaterial({
-                uniforms: THREE.UniformsUtils.clone(pulseUniforms),
-                vertexShader: connectionShader.vertexShader,
-                fragmentShader: connectionShader.fragmentShader,
-                transparent: true,
-                depthWrite: false,
-                blending: THREE.AdditiveBlending
-            });
-            connectionsMesh = new THREE.LineSegments(connectionsGeometry, connectionsMaterial);
-            scene.add(connectionsMesh);
-            palette.forEach((color, i) => {
-                if (i < 3) {
-                    (connectionsMaterial.uniforms.uPulseColors.value as THREE.Color[])[i].copy(color);
-                    (nodesMaterial.uniforms.uPulseColors.value as THREE.Color[])[i].copy(color);
-                }
-            });
-        }
+      {/* Radial vignette */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_38%,rgba(2,8,18,0.78)_100%)]" />
 
-        const raycaster = new THREE.Raycaster();
-        const pointer = new THREE.Vector2();
-        const interactionPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-        const interactionPoint = new THREE.Vector3();
-        let lastPulseIndex = 0;
-
-        function triggerPulse(clientX: number, clientY: number) {
-            pointer.x = (clientX / window.innerWidth) * 2 - 1;
-            pointer.y = -(clientY / window.innerHeight) * 2 + 1;
-            raycaster.setFromCamera(pointer, camera);
-            interactionPlane.normal.copy(camera.position).normalize();
-            interactionPlane.constant = -interactionPlane.normal.dot(camera.position) + camera.position.length() * 0.5;
-            if (raycaster.ray.intersectPlane(interactionPlane, interactionPoint)) {
-                const time = clock.getElapsedTime();
-                if (nodesMesh && connectionsMesh) {
-                    lastPulseIndex = (lastPulseIndex + 1) % 3;
-                    ((nodesMesh.material as THREE.ShaderMaterial).uniforms.uPulsePositions.value as THREE.Vector3[])[lastPulseIndex].copy(interactionPoint);
-                    ((nodesMesh.material as THREE.ShaderMaterial).uniforms.uPulseTimes.value as number[])[lastPulseIndex] = time;
-                    ((connectionsMesh.material as THREE.ShaderMaterial).uniforms.uPulsePositions.value as THREE.Vector3[])[lastPulseIndex].copy(interactionPoint);
-                    ((connectionsMesh.material as THREE.ShaderMaterial).uniforms.uPulseTimes.value as number[])[lastPulseIndex] = time;
-                    const palette = colorPalettes[config.activePaletteIndex];
-                    const randomColor = palette[Math.floor(Math.random() * palette.length)];
-                    ((nodesMesh.material as THREE.ShaderMaterial).uniforms.uPulseColors.value as THREE.Color[])[lastPulseIndex].copy(randomColor);
-                    ((connectionsMesh.material as THREE.ShaderMaterial).uniforms.uPulseColors.value as THREE.Color[])[lastPulseIndex].copy(randomColor);
-                }
-            }
-        }
-        
-        const handleCanvasClick = (e: MouseEvent | TouchEvent) => {
-            if ((e.target as HTMLElement).closest('.glass-panel, #control-buttons')) return;
-            if (e instanceof TouchEvent) {
-                e.preventDefault();
-                if (e.touches.length > 0 && !config.paused) {
-                    triggerPulse(e.touches[0].clientX, e.touches[0].clientY);
-                }
-            } else if (e instanceof MouseEvent) {
-                if (!config.paused) triggerPulse(e.clientX, e.clientY);
-            }
-        };
-
-        renderer.domElement.addEventListener('click', handleCanvasClick);
-        renderer.domElement.addEventListener('touchstart', handleCanvasClick, { passive: false });
-
-        const clock = new THREE.Clock();
-        let animationFrameId: number;
-        function animate() {
-            animationFrameId = requestAnimationFrame(animate);
-            const t = clock.getElapsedTime();
-            if (!config.paused) {
-                if (nodesMesh) {
-                    (nodesMesh.material as THREE.ShaderMaterial).uniforms.uTime.value = t;
-                    nodesMesh.rotation.y = Math.sin(t * 0.04) * 0.05;
-                }
-                if (connectionsMesh) {
-                    (connectionsMesh.material as THREE.ShaderMaterial).uniforms.uTime.value = t;
-                    connectionsMesh.rotation.y = Math.sin(t * 0.04) * 0.05;
-                }
-            }
-            starField.rotation.y += 0.0002;
-            (starField.material as THREE.ShaderMaterial).uniforms.uTime.value = t;
-            controls.update();
-            composer.render();
-        }
-
-        const handleMorph = () => {
-            config.currentFormation = (config.currentFormation + 1) % config.numFormations;
-            createNetworkVisualization(config.currentFormation, config.densityFactor);
-            controls.autoRotate = false;
-            setTimeout(() => { controls.autoRotate = true; }, 2500);
-        };
-        
-        const handlePausePlay = () => {
-            config.paused = !config.paused;
-            controls.autoRotate = !config.paused;
-        };
-        
-        const handleReset = () => {
-            controls.reset();
-            controls.autoRotate = false;
-            setTimeout(() => { controls.autoRotate = true; }, 2000);
-        };
-
-        window.addEventListener('morph', handleMorph);
-        window.addEventListener('pause-play', handlePausePlay);
-        window.addEventListener('reset-camera', handleReset);
-
-
-        function init() {
-            createNetworkVisualization(config.currentFormation, config.densityFactor);
-            animate();
-        }
-        
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            composer.setSize(window.innerWidth, window.innerHeight);
-            bloomPass.resolution.set(window.innerWidth, window.innerHeight);
-        }
-        
-        window.addEventListener('resize', onWindowResize);
-
-        init();
-
-        return () => {
-            window.removeEventListener('resize', onWindowResize);
-            renderer.domElement.removeEventListener('click', handleCanvasClick);
-            renderer.domElement.removeEventListener('touchstart', handleCanvasClick);
-
-            window.removeEventListener('morph', handleMorph);
-            window.removeEventListener('pause-play', handlePausePlay);
-            window.removeEventListener('reset-camera', handleReset);
-
-            cancelAnimationFrame(animationFrameId);
-            scene.traverse(object => {
-                if (object instanceof THREE.Mesh || object instanceof THREE.Points || object instanceof THREE.LineSegments) {
-                    object.geometry.dispose();
-                    if(Array.isArray(object.material)) {
-                        object.material.forEach(material => material.dispose());
-                    } else if (object.material) {
-                        (object.material as THREE.Material).dispose();
-                    }
-                }
-            });
-            renderer.dispose();
-        };
-
-    }, []);
-
-    const handleMorph = () => {
-        window.dispatchEvent(new CustomEvent('morph'));
-    };
-    
-    const handlePausePlay = () => {
-        setIsPaused(p => !p);
-        window.dispatchEvent(new CustomEvent('pause-play'));
-    };
-    
-    const handleReset = () => {
-        window.dispatchEvent(new CustomEvent('reset-camera'));
-    };
-
-    return (
-        <div className="fixed inset-0 z-[-1]">
-            <div id="control-buttons">
-                <button id="change-formation-btn" className="control-button" onClick={handleMorph}><span>Morph</span></button>
-                <button id="pause-play-btn" className="control-button" ref={pausePlayBtnRef} onClick={handlePausePlay}><span>{isPaused ? 'Play' : 'Freeze'}</span></button>
-                <button id="reset-camera-btn" className="control-button" onClick={handleReset}><span>Reset</span></button>
-            </div>
-            <canvas ref={canvasRef} id="neural-network-canvas"></canvas>
-        </div>
-    );
+      {/* ── Interactive HUD overlays (pointer-events re-enabled locally) ── */}
+      <div className="pointer-events-auto">
+        <HUD progress={progress} activeIndex={activeIndex} />
+      </div>
+    </div>
+  );
 }

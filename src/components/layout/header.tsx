@@ -3,7 +3,7 @@
 import { Home, User, Wrench, Briefcase, LayoutGrid, Mail } from 'lucide-react';
 import { navLinks } from '@/lib/data';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform, type MotionValue } from 'framer-motion';
 import React, { useRef } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -24,11 +24,11 @@ const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) =
     }
 };
 
-const DockItem = ({ mouseX, link }: { mouseX: any, link: typeof navLinks[0] }) => {
+const DockItem = ({ mouseX, link }: { mouseX: MotionValue<number>, link: typeof navLinks[0] }) => {
   const Icon = iconMap[link.label];
   const ref = useRef<HTMLAnchorElement>(null);
 
-  const distance = useTransform(mouseX, (val) => {
+  const distance = useTransform(mouseX, (val: number) => {
     const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
     return val - bounds.x - bounds.width / 2;
   });

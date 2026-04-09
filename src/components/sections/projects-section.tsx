@@ -73,7 +73,7 @@ export function ProjectsSection() {
     <section id="projects">
       <h2 className="section-heading">Projects Showcase</h2>
       <p className="section-subheading">
-        Here are some of the projects I'm proud of. Each one represents a challenge I was excited to solve.
+        Here are some of the projects I&apos;m proud of. Each one represents a challenge I was excited to solve.
       </p>
       <div className="mt-16 relative px-12">
         <Carousel
