@@ -20,7 +20,7 @@ export function Footer() {
   };
 
   return (
-    <footer className="bg-background/80 backdrop-blur-sm w-full py-8 border-t border-primary/10">
+    <footer className="bg-background/80 backdrop-blur-sm w-full py-8 pb-32 border-t border-primary/10 relative z-10">
       <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
         <div className="text-center md:text-left">
           <p className="text-muted-foreground">

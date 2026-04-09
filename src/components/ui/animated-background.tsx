@@ -221,7 +221,7 @@ const CursorGlow = memo(function CursorGlow({ spotX, spotY }: CursorGlowProps) {
     [spotX, spotY] as MotionValue[],
     (values: number[]) => {
       const [x = 0.5, y = 0.4] = values;
-      return `radial-gradient(ellipse 28rem 22rem at ${x * 100}% ${y * 100}%, rgba(160,218,255,0.11) 0%, rgba(120,180,255,0.05) 45%, transparent 70%)`;
+      return `radial-gradient(ellipse 40rem 35rem at ${x * 100}% ${y * 100}%, rgba(0,212,255,0.3) 0%, rgba(139,92,246,0.15) 35%, transparent 70%)`;
     },
   );
 
@@ -239,23 +239,23 @@ interface WordSpanProps {
 }
 
 const WordSpan = memo(function WordSpan({ word, index }: WordSpanProps) {
-  const baseOpacity = word.layer === 1 ? 0.055 : word.layer === 2 ? 0.085 : 0.115;
+  const baseOpacity = word.layer === 1 ? 0.25 : word.layer === 2 ? 0.4 : 0.6;
   const tintTemplate = CATEGORY_TINT[word.category];
 
   return (
     <span
-      className="absolute whitespace-nowrap select-none pointer-events-none"
+      className="absolute whitespace-nowrap select-none pointer-events-none transition-all duration-300 hover:opacity-100"
       style={{
         top: `${word.top}%`,
         left: `${word.left}%`,
         fontSize: `${word.size}rem`,
         transform: `rotate(${word.rotate}deg)`,
         fontFamily: '"JetBrains Mono", "Fira Code", ui-monospace, monospace',
-        fontWeight: 500,
+        fontWeight: 600,
         letterSpacing: '0.32em',
         textTransform: 'uppercase',
-        color: `rgba(180, 210, 240, ${baseOpacity})`,
-        textShadow: `0 0 18px ${tintTemplate.replace('VAR', '0.02')}`,
+        color: `rgba(220, 240, 255, ${baseOpacity})`,
+        textShadow: `0 0 12px ${tintTemplate.replace('VAR', '0.6')}`,
         animation: `word-drift-${index} ${word.duration}s ${word.delay}s ease-in-out infinite alternate`,
         willChange: 'transform',
         zIndex: word.layer,
@@ -409,7 +409,7 @@ export function AnimatedBackground() {
     },
   );
 
-  const hazeOpacity = useTransform(smoothProgress, [0, 0.55, 1], [0.18, 0.28, 0.36]);
+  const hazeOpacity = useTransform(smoothProgress, [0, 1, 1], [0.18, 0.28, 0.36]);
   const ringScale   = useTransform(smoothProgress, [0, 1], [0.88, 1.16]);
 
   return (
