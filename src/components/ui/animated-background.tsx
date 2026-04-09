@@ -184,54 +184,7 @@ function useScrollState(): ScrollState {
   return state;
 }
 
-// ─── Hook: useMouseSpotlight ──────────────────────────────────────────────────
-
-interface MouseSpotlight {
-  x: MotionValue<number>;
-  y: MotionValue<number>;
-}
-
-function useMouseSpotlight(): MouseSpotlight {
-  const mouseX = useMotionValue(0.5);
-  const mouseY = useMotionValue(0.4);
-  const x = useSpring(mouseX, SPRING_MOUSE);
-  const y = useSpring(mouseY, SPRING_MOUSE);
-
-  useEffect(() => {
-    const handleMove = (e: MouseEvent) => {
-      mouseX.set(e.clientX / window.innerWidth);
-      mouseY.set(e.clientY / window.innerHeight);
-    };
-    window.addEventListener('mousemove', handleMove);
-    return () => window.removeEventListener('mousemove', handleMove);
-  }, [mouseX, mouseY]);
-
-  return { x, y };
-}
-
 // ─── Sub-components ──────────────────────────────────────────────────────────
-
-interface CursorGlowProps {
-  spotX: MotionValue<number>;
-  spotY: MotionValue<number>;
-}
-
-const CursorGlow = memo(function CursorGlow({ spotX, spotY }: CursorGlowProps) {
-  const bg = useTransform(
-    [spotX, spotY] as MotionValue[],
-    (values: number[]) => {
-      const [x = 0.5, y = 0.4] = values;
-      return `radial-gradient(ellipse 40rem 35rem at ${x * 100}% ${y * 100}%, rgba(0,212,255,0.3) 0%, rgba(139,92,246,0.15) 35%, transparent 70%)`;
-    },
-  );
-
-  return (
-    <motion.div
-      className="absolute inset-0 pointer-events-none will-change-[background]"
-      style={{ background: bg }}
-    />
-  );
-});
 
 interface WordSpanProps {
   word: BackgroundWord;
@@ -289,12 +242,7 @@ function useWordKeyframes() {
   }, []);
 }
 
-interface TechWordFieldProps {
-  spotX: MotionValue<number>;
-  spotY: MotionValue<number>;
-}
-
-const TechWordField = memo(function TechWordField({ spotX, spotY }: TechWordFieldProps) {
+const TechWordField = memo(function TechWordField() {
   useWordKeyframes();
 
   return (
@@ -303,9 +251,6 @@ const TechWordField = memo(function TechWordField({ spotX, spotY }: TechWordFiel
         {WORDS.map((word, index) => (
           <WordSpan key={`${word.label}-${index}`} word={word} index={index} />
         ))}
-      </div>
-      <div className="absolute inset-0" style={{ mixBlendMode: 'screen' }}>
-        <CursorGlow spotX={spotX} spotY={spotY} />
       </div>
     </div>
   );
@@ -391,8 +336,6 @@ const RobotLayer = memo(function RobotLayer({ smoothProgress }: RobotLayerProps)
 
 export function AnimatedBackground() {
   const { progress, activeIndex } = useScrollState();
-  const spotlight = useMouseSpotlight();
-
   const scrollMotion = useMotionValue(0);
   const smoothProgress = useSpring(scrollMotion, SPRING_SCROLL);
 
@@ -400,14 +343,6 @@ export function AnimatedBackground() {
   useEffect(() => {
     scrollMotion.set(progress);
   }, [progress, scrollMotion]);
-
-  const spotlightBackground = useTransform(
-    [spotlight.x, spotlight.y] as MotionValue[],
-    (values: number[]) => {
-      const [x = 0.5, y = 0.4] = values;
-      return `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(132,207,255,0.18), rgba(132,207,255,0) 28%)`;
-    },
-  );
 
   const hazeOpacity = useTransform(smoothProgress, [0, 1, 1], [0.18, 0.28, 0.36]);
   const ringScale   = useTransform(smoothProgress, [0, 1], [0.88, 1.16]);
@@ -420,14 +355,11 @@ export function AnimatedBackground() {
       {/* Base gradient */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(86,146,196,0.24),transparent_36%),linear-gradient(160deg,#071120_0%,#030812_45%,#08111d_100%)]" />
 
-      {/* Mouse spotlight */}
-      <motion.div className="absolute inset-0 will-change-[background]" style={{ background: spotlightBackground }} />
-
       {/* Subtle grid */}
       <div className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(rgba(220,235,248,0.17)_1px,transparent_1px),linear-gradient(90deg,rgba(164,184,204,0.12)_1px,transparent_1px)] [background-size:92px_92px]" />
 
-      {/* Cursor-reactive ML word field */}
-      <TechWordField spotX={spotlight.x} spotY={spotlight.y} />
+      {/* Static ML word field */}
+      <TechWordField />
 
       {/* Bottom vignette */}
       <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_0%,rgba(1,6,11,0.28)_44%,rgba(1,6,11,0.62)_100%)]" />
