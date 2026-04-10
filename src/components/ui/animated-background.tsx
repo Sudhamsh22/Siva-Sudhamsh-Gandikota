@@ -147,6 +147,22 @@ interface HUDProps {
   activeIndex: number;
 }
 
+interface TrainingLogLine {
+  kind: 'boot' | 'data' | 'train' | 'eval' | 'save';
+  text: string;
+}
+
+interface TrainingSnapshot {
+  phase: string;
+  epoch: string;
+  loss: string;
+  valAccuracy: string;
+  gpu: string;
+  throughput: string;
+  learningRate: string;
+  queueDepth: string;
+}
+
 const HUD = memo(function HUD({ progress, activeIndex }: HUDProps) {
   const progressPercent = useMemo(() => padProgress(progress), [progress]);
 
@@ -182,6 +198,272 @@ const HUD = memo(function HUD({ progress, activeIndex }: HUDProps) {
         </div>
       </div>
     </div>
+  );
+});
+
+const TRAINING_LOGS: TrainingLogLine[] = [
+  {
+    kind: 'boot',
+    text: '$ python train.py --model yolov11m --data custom.yaml --epochs 150 --batch 32 --device cuda:0',
+  },
+  {
+    kind: 'data',
+    text: '[loader] indexed 128492 samples | cache=ram | augment=mosaic,mixup,randaugment',
+  },
+  {
+    kind: 'train',
+    text: '[epoch 008/150] loss=1.1423 cls=0.218 box=0.671 dfl=0.253 grad_norm=7.8',
+  },
+  {
+    kind: 'train',
+    text: '[epoch 019/150] loss=0.6841 lr=3.10e-4 throughput=408 img/s warmup=complete',
+  },
+  {
+    kind: 'eval',
+    text: '[validate] top1=91.8% precision=0.934 recall=0.917 f1=0.925 auc=0.962',
+  },
+  {
+    kind: 'save',
+    text: '[checkpoint] best.pt updated | val_loss improved 0.441 -> 0.398 | sync=tensorboard',
+  },
+  {
+    kind: 'data',
+    text: '[dataloader] prefetch queue stable | workers=8 pinned_memory=true cpu_load=61%',
+  },
+  {
+    kind: 'train',
+    text: '[epoch 047/150] loss=0.3927 ema=enabled label_smoothing=0.05 amp=fp16',
+  },
+  {
+    kind: 'eval',
+    text: '[validate] map50=0.948 map50-95=0.811 calibration_error=0.017 drift=nominal',
+  },
+  {
+    kind: 'save',
+    text: '[export] onnx checkpoint staged | tracing kernels | artifact=vision-stack-v4.onnx',
+  },
+  {
+    kind: 'train',
+    text: '[epoch 083/150] loss=0.2148 val_loss=0.2671 scheduler=cosine_restart patience=12',
+  },
+  {
+    kind: 'eval',
+    text: '[monitor] early-stop guard healthy | gpu_temp=67C vram=17.2/24.0GB power=241W',
+  },
+];
+
+const TRAINING_SNAPSHOTS: TrainingSnapshot[] = [
+  {
+    phase: 'Dataset Profiling',
+    epoch: '008 / 150',
+    loss: '1.142',
+    valAccuracy: '91.8%',
+    gpu: '74%',
+    throughput: '408 img/s',
+    learningRate: '3.10e-4',
+    queueDepth: '28 batches',
+  },
+  {
+    phase: 'Backbone Warmup',
+    epoch: '019 / 150',
+    loss: '0.684',
+    valAccuracy: '93.4%',
+    gpu: '82%',
+    throughput: '421 img/s',
+    learningRate: '2.66e-4',
+    queueDepth: '31 batches',
+  },
+  {
+    phase: 'Feature Fusion',
+    epoch: '047 / 150',
+    loss: '0.393',
+    valAccuracy: '94.1%',
+    gpu: '86%',
+    throughput: '437 img/s',
+    learningRate: '1.90e-4',
+    queueDepth: '33 batches',
+  },
+  {
+    phase: 'Fine-Tuning Heads',
+    epoch: '083 / 150',
+    loss: '0.215',
+    valAccuracy: '95.0%',
+    gpu: '89%',
+    throughput: '452 img/s',
+    learningRate: '1.14e-4',
+    queueDepth: '35 batches',
+  },
+  {
+    phase: 'Calibration Sweep',
+    epoch: '116 / 150',
+    loss: '0.181',
+    valAccuracy: '95.6%',
+    gpu: '78%',
+    throughput: '398 img/s',
+    learningRate: '6.90e-5',
+    queueDepth: '24 batches',
+  },
+  {
+    phase: 'Checkpoint Consolidation',
+    epoch: '149 / 150',
+    loss: '0.164',
+    valAccuracy: '96.1%',
+    gpu: '64%',
+    throughput: '366 img/s',
+    learningRate: '1.50e-5',
+    queueDepth: '12 batches',
+  },
+];
+
+const TRAINING_WINDOW_SIZE = 6;
+const TRAINING_TICK_MS = 1600;
+
+function getLogAccent(kind: TrainingLogLine['kind']): string {
+  switch (kind) {
+    case 'boot':
+      return 'text-sky-100/70';
+    case 'data':
+      return 'text-cyan-200/70';
+    case 'train':
+      return 'text-emerald-200/75';
+    case 'eval':
+      return 'text-amber-200/75';
+    case 'save':
+      return 'text-violet-200/75';
+    default:
+      return 'text-slate-200/70';
+  }
+}
+
+function useTrainingTelemetry() {
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setTick((current) => current + 1);
+    }, TRAINING_TICK_MS);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
+  const visibleLogs = useMemo(() => {
+    return Array.from({ length: TRAINING_WINDOW_SIZE }, (_, offset) => {
+      const historyIndex = tick - (TRAINING_WINDOW_SIZE - 1 - offset);
+      if (historyIndex < 0) return null;
+
+      const log = TRAINING_LOGS[historyIndex % TRAINING_LOGS.length];
+      return {
+        ...log,
+        id: `${historyIndex}-${log.text}`,
+      };
+    }).filter((log): log is TrainingLogLine & { id: string } => Boolean(log));
+  }, [tick]);
+
+  const snapshot = TRAINING_SNAPSHOTS[tick % TRAINING_SNAPSHOTS.length];
+  const cycleProgress = ((tick % TRAINING_SNAPSHOTS.length) + 1) / TRAINING_SNAPSHOTS.length;
+
+  return { cycleProgress, snapshot, tick, visibleLogs };
+}
+
+const TrainingConsole = memo(function TrainingConsole() {
+  const { cycleProgress, snapshot, visibleLogs } = useTrainingTelemetry();
+
+  return (
+    <>
+      <motion.div
+        className="absolute right-[4%] top-[18%] hidden w-[24rem] overflow-hidden rounded-[1.6rem] border border-sky-200/10 bg-slate-950/24 shadow-[0_30px_90px_rgba(2,12,27,0.35)] backdrop-blur-2xl xl:block"
+        animate={{ y: [0, -10, 0] }}
+        transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <div className="flex items-center justify-between border-b border-slate-200/10 bg-slate-950/45 px-4 py-3 font-mono text-[0.62rem] uppercase tracking-[0.28em] text-slate-400">
+          <span>training-monitor.log</span>
+          <span className="text-emerald-300/80">cuda:0 active</span>
+        </div>
+
+        <div className="space-y-2 px-4 py-4 font-mono text-[0.68rem] leading-6">
+          {visibleLogs.map((log, index) => {
+            const isLatest = index === visibleLogs.length - 1;
+            return (
+              <motion.div
+                key={log.id}
+                initial={{ opacity: 0, x: 8 }}
+                animate={{ opacity: isLatest ? 0.98 : 0.62, x: 0 }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+                className={`flex gap-3 ${getLogAccent(log.kind)}`}
+              >
+                <span className="text-slate-500">[{String(index + 1).padStart(2, '0')}]</span>
+                <span className="flex-1">{log.text}</span>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        <div className="border-t border-slate-200/10 px-4 py-4">
+          <div className="mb-2 flex items-center justify-between text-[0.62rem] uppercase tracking-[0.28em] text-slate-400">
+            <span>{snapshot.phase}</span>
+            <span>{snapshot.epoch}</span>
+          </div>
+          <div className="h-1 overflow-hidden rounded-full bg-slate-200/10">
+            <motion.div
+              className="h-full rounded-full bg-gradient-to-r from-cyan-300 via-sky-400 to-emerald-300"
+              animate={{ width: `${cycleProgress * 100}%` }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+            />
+          </div>
+        </div>
+      </motion.div>
+
+      <motion.div
+        className="absolute bottom-[14%] left-[4%] hidden w-[20rem] rounded-[1.4rem] border border-white/10 bg-slate-950/20 p-4 shadow-[0_24px_80px_rgba(2,12,27,0.28)] backdrop-blur-2xl lg:block"
+        animate={{ y: [0, 10, 0] }}
+        transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <div className="mb-4 flex items-center justify-between text-[0.62rem] uppercase tracking-[0.28em] text-slate-400">
+          <span>Training Telemetry</span>
+          <span className="text-sky-200/80">{snapshot.phase}</span>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 text-[0.7rem]">
+          <div className="rounded-2xl border border-white/8 bg-white/5 px-3 py-2">
+            <div className="text-slate-500">Loss</div>
+            <div className="mt-1 font-mono text-emerald-200">{snapshot.loss}</div>
+          </div>
+          <div className="rounded-2xl border border-white/8 bg-white/5 px-3 py-2">
+            <div className="text-slate-500">Val Acc</div>
+            <div className="mt-1 font-mono text-cyan-200">{snapshot.valAccuracy}</div>
+          </div>
+          <div className="rounded-2xl border border-white/8 bg-white/5 px-3 py-2">
+            <div className="text-slate-500">GPU Util</div>
+            <div className="mt-1 font-mono text-sky-100">{snapshot.gpu}</div>
+          </div>
+          <div className="rounded-2xl border border-white/8 bg-white/5 px-3 py-2">
+            <div className="text-slate-500">Throughput</div>
+            <div className="mt-1 font-mono text-violet-200">{snapshot.throughput}</div>
+          </div>
+          <div className="rounded-2xl border border-white/8 bg-white/5 px-3 py-2">
+            <div className="text-slate-500">LR</div>
+            <div className="mt-1 font-mono text-amber-200">{snapshot.learningRate}</div>
+          </div>
+          <div className="rounded-2xl border border-white/8 bg-white/5 px-3 py-2">
+            <div className="text-slate-500">Queue</div>
+            <div className="mt-1 font-mono text-slate-100">{snapshot.queueDepth}</div>
+          </div>
+        </div>
+      </motion.div>
+
+      <motion.div
+        className="absolute left-1/2 top-[11%] hidden -translate-x-1/2 rounded-full border border-sky-200/10 bg-slate-950/25 px-4 py-2 font-mono text-[0.62rem] uppercase tracking-[0.3em] text-slate-300 shadow-[0_16px_60px_rgba(2,12,27,0.2)] backdrop-blur-xl md:flex"
+        animate={{ opacity: [0.55, 0.9, 0.55] }}
+        transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        <span className="mr-3 text-emerald-300/85">ml pipeline</span>
+        <span className="text-slate-400">augmentation</span>
+        <span className="mx-3 text-slate-600">/</span>
+        <span className="text-slate-400">backprop</span>
+        <span className="mx-3 text-slate-600">/</span>
+        <span className="text-slate-400">checkpointing</span>
+      </motion.div>
+    </>
   );
 });
 
@@ -405,6 +687,7 @@ export function AnimatedBackground() {
       />
 
       <NeuralScene smoothProgress={smoothProgress} />
+      <TrainingConsole />
 
       <motion.div
         className="absolute left-[8%] top-[18%] h-48 w-48 rounded-full bg-[radial-gradient(circle_at_center,rgba(220,236,248,0.18),rgba(220,236,248,0)_72%)] blur-3xl"
