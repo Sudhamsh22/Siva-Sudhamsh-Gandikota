@@ -29,7 +29,6 @@ function ExperienceItem({
   const Icon = iconMap[item.company] || Activity;
 
   // Animated connector line from center
-  const lineHeight = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
   const opacity = useTransform(scrollYProgress, [0.5, 1], [0, 1]);
   const scale = useTransform(scrollYProgress, [0.5, 1], [0.8, 1]);
 

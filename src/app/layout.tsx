@@ -25,6 +25,8 @@ export const metadata: Metadata = {
   keywords: "AI Engineer, Machine Learning, Full-Stack Developer, React, FastAPI, YOLO, Computer Vision, Python, Node.js",
 };
 
+import { LoadingScreen } from '@/components/ui/LoadingScreen';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -33,6 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${spaceGrotesk.variable} ${outfit.variable} font-body antialiased selection:bg-primary/20`}>
+        <LoadingScreen />
         <AnimatedBackground />
         {children}
         <Toaster />

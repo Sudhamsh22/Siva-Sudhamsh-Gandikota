@@ -1,20 +1,33 @@
 'use client';
 
-import React from 'react';
-import { motion, useInView } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { projects } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Github, ExternalLink, Cpu, BarChart3, Users, Zap } from 'lucide-react';
+import { Github, ExternalLink, Cpu, BarChart3, Zap } from 'lucide-react';
 
 export function ProjectsSection() {
   const ref = React.useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
 
-  // Separate AutoTuning.AI for the Insights Tool showcase
   const autoTuningProject = projects.find(p => p.id === 'autotuning-ai');
   const otherProjects = projects.filter(p => p.id !== 'autotuning-ai');
+
+  const categories = ['All', 'Machine Learning', 'Full-Stack'];
+  const [activeCategory, setActiveCategory] = useState('All');
+
+  const filteredProjects = otherProjects.filter(project => {
+    if (activeCategory === 'All') return true;
+    if (activeCategory === 'Machine Learning') {
+      return project.tech.some(t => ['Python', 'YOLO', 'Scikit-learn', 'FastAPI', 'Streamlit'].includes(t));
+    }
+    if (activeCategory === 'Full-Stack') {
+       return project.tech.some(t => ['React', 'Next.js', 'Node.js', 'MongoDB', 'Tailwind CSS'].includes(t));
+    }
+    return true;
+  });
 
   return (
     <section id="projects" ref={ref} className="py-24 relative z-10 w-full max-w-7xl mx-auto px-4">
@@ -139,14 +152,31 @@ export function ProjectsSection() {
       )}
 
       {/* Other Projects Grid */}
-      <h3 className="text-2xl font-headline font-bold text-white mb-8 border-l-4 border-accent pl-4">Additional Architectures</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {otherProjects.map((project, i) => (
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+        <h3 className="text-2xl font-headline font-bold text-white border-l-4 border-accent pl-4">Additional Architectures</h3>
+        <div className="flex flex-wrap gap-2">
+            {categories.map(cat => (
+                <button 
+                    key={cat} 
+                    onClick={() => setActiveCategory(cat)}
+                    className={`px-4 py-1.5 rounded-full text-xs font-mono tracking-widest transition-all ${activeCategory === cat ? 'bg-primary text-background shadow-[0_0_15px_rgba(0,212,255,0.4)]' : 'bg-primary/10 text-primary/70 hover:bg-primary/20 hover:text-primary'}`}
+                >
+                    {cat}
+                </button>
+            ))}
+        </div>
+      </div>
+      
+      <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative">
+          <AnimatePresence mode="popLayout">
+          {filteredProjects.map((project) => (
              <motion.div
                 key={project.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
              >
                 <Card className="glass-card flex flex-col h-full bg-background/40 hover:bg-background/60 transition-colors border-white/5">
                     <CardHeader className="p-5 pb-3">
@@ -180,7 +210,8 @@ export function ProjectsSection() {
                 </Card>
              </motion.div>
           ))}
-      </div>
+          </AnimatePresence>
+      </motion.div>
     </section>
   );
 }
