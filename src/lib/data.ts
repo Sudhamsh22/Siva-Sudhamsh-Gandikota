@@ -200,7 +200,7 @@ export const projects = [
 
 export const leadershipAndAchievements = [
   {
-    title: 'Vice-President & PR at GRIET',
+    title: 'Vice-President & PR at GRIET(Student Club)',
     description: 'Led a team to organize events, manage public relations, and enhance student engagement across the campus.',
   },
   {
