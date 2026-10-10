@@ -15,7 +15,7 @@ export function SkillsSection() {
         transition={{ duration: 0.5 }}
       >
         <p className="section-eyebrow">Technical Capabilities</p>
-        <h2 className="section-heading">Skills & Stack</h2>
+        <h2 className="section-heading">Skills & Tech Stack</h2>
         <p className="section-subheading">
           Categorized technical toolset across machine learning engineering, backend services, and modern interfaces.
         </p>

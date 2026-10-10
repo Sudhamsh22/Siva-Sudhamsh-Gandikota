@@ -124,7 +124,7 @@ export const projects: ProjectItem[] = [
       "RAG",
     ],
     links: {
-      github: "https://github.com/Sudhamsh22/MYFI.AI.git",
+      github: "https://github.com/Nithin7king/finagent.git",
     },
   },
   {
