@@ -1,217 +1,337 @@
 'use client';
 
-import React, { useState } from 'react';
-import { motion, useInView, AnimatePresence } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
 import { projects } from '@/lib/data';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Github, ExternalLink, Cpu, BarChart3, Zap } from 'lucide-react';
+import {
+  ExternalLink,
+  Github,
+  Zap,
+  AlertCircle,
+  Sparkles,
+  Layers,
+  ArrowRight,
+  Database,
+  Cpu,
+  CheckCircle2,
+} from 'lucide-react';
 
-export function ProjectsSection() {
-  const ref = React.useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
-
-  const autoTuningProject = projects.find(p => p.id === 'autotuning-ai');
-  const otherProjects = projects.filter(p => p.id !== 'autotuning-ai');
-
-  const categories = ['All', 'Machine Learning', 'Full-Stack'];
-  const [activeCategory, setActiveCategory] = useState('All');
-
-  const filteredProjects = otherProjects.filter(project => {
-    if (activeCategory === 'All') return true;
-    if (activeCategory === 'Machine Learning') {
-      return project.tech.some(t => ['Python', 'YOLO', 'Scikit-learn', 'FastAPI', 'Streamlit'].includes(t));
-    }
-    if (activeCategory === 'Full-Stack') {
-       return project.tech.some(t => ['React', 'Next.js', 'Node.js', 'MongoDB', 'Tailwind CSS'].includes(t));
-    }
-    return true;
-  });
-
+function MyFiDiagram() {
   return (
-    <section id="projects" ref={ref} className="py-24 relative z-10 w-full max-w-7xl mx-auto px-4">
-      
-      <div className="text-center mb-16">
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
-        >
-            <h2 className="text-4xl md:text-5xl font-bold font-headline text-white tracking-tight mb-4 filter drop-shadow-lg drop-shadow-primary/20">
-                System <span className="text-primary">Deployments</span>
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-                Showcase of engineered platforms, machine learning tools, and intelligent architectures.
-            </p>
-        </motion.div>
+    <div className="mt-6 rounded-xl border border-primary/20 bg-primary/[0.03] p-4 sm:p-5">
+      <div className="flex items-center justify-between border-b border-white/5 pb-2.5 mb-3.5">
+        <div className="flex items-center gap-2">
+          <Layers className="h-4 w-4 text-primary" />
+          <span className="text-xs font-mono uppercase tracking-wider text-slate-300">
+            System Architecture: Multi-Agent Orchestration
+          </span>
+        </div>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 font-mono text-[0.65rem] text-emerald-400 border border-emerald-500/20">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          LangGraph Stateful Routing
+        </span>
       </div>
 
-      {autoTuningProject && (
-        <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="mb-20"
-        >
-          {/* Main AutoTuning.AI Insights Dashboard */}
-          <div className="relative glass-card border border-primary/30 p-1 rounded-3xl overflow-hidden shadow-[0_0_50px_-15px_rgba(0,212,255,0.2)] bg-gradient-to-b from-background/90 to-background/50">
-            {/* Dashboard Header UI */}
-            <div className="bg-black/40 border-b border-primary/20 px-6 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <Cpu className="text-primary animate-pulse" />
-                    <span className="font-mono text-sm tracking-widest text-primary/80 uppercase mr-4">Insights Tool</span>
-                    <h3 className="font-headline text-2xl font-bold text-white tracking-wide">{autoTuningProject.name}</h3>
-                </div>
-                <div className="hidden sm:flex gap-1.5">
-                    <div className="w-2 h-2 rounded-full bg-primary/50 animate-ping"></div>
-                    <div className="w-2 h-2 rounded-full bg-accent/50"></div>
-                </div>
-            </div>
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 text-center">
+        <div className="rounded-lg border border-white/10 bg-white/[0.03] p-2.5 flex flex-col items-center justify-center">
+          <span className="text-[0.65rem] font-mono uppercase text-muted-foreground">Input</span>
+          <span className="text-xs font-semibold text-foreground mt-0.5">Transaction Stream</span>
+          <span className="text-[0.65rem] text-slate-400 mt-1">PostgreSQL Ledger</span>
+        </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 lg:gap-px bg-primary/10">
-                {/* Left Col - Info */}
-                <div className="col-span-1 lg:col-span-2 bg-background p-8 lg:p-12 flex flex-col justify-center relative">
-                    <div className="absolute top-0 right-0 p-32 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/15 to-transparent blur-2xl"></div>
-                    
-                    <p className="text-lg md:text-xl text-muted-foreground font-light leading-relaxed mb-6 z-10">
-                        {autoTuningProject.description} 
-                        <br/><br/>
-                        <span className="text-white/80 font-medium">Generative AI dynamically reasons to display relevant diagnostic insights to the user for drastically improved comprehension and workflow efficiency.</span>
-                    </p>
-                    
-                    <div className="flex flex-wrap gap-2 mb-8 z-10">
-                        {autoTuningProject.tech.map(tech => (
-                            <span key={tech} className="px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-xs font-mono uppercase tracking-wider rounded">
-                                {tech}
-                            </span>
-                        ))}
-                    </div>
+        <div className="rounded-lg border border-primary/30 bg-primary/[0.06] p-2.5 flex flex-col items-center justify-center relative">
+          <span className="text-[0.65rem] font-mono uppercase text-primary">Hybrid RAG</span>
+          <span className="text-xs font-semibold text-foreground mt-0.5">SentenceTransformers</span>
+          <span className="text-[0.65rem] text-primary/80 mt-1">ChromaDB Vector Store</span>
+        </div>
 
-                    <div className="flex gap-4 z-10">
-                        {autoTuningProject.links.live && (
-                            <Button asChild size="lg" className="bg-primary text-background shadow-[0_0_15px_rgba(0,212,255,0.3)] hover:shadow-[0_0_25px_rgba(0,212,255,0.5)]">
-                                <a href={autoTuningProject.links.live} target="_blank" rel="noopener noreferrer">Live Diagnostics <ExternalLink className="ml-2 w-4 h-4" /></a>
-                            </Button>
-                        )}
-                        {autoTuningProject.links.github && (
-                            <Button asChild size="lg" variant="outline" className="border-accent/40 text-accent hover:bg-accent/10">
-                                <a href={autoTuningProject.links.github} target="_blank" rel="noopener noreferrer">Source Code <Github className="ml-2 w-4 h-4" /></a>
-                            </Button>
-                        )}
-                    </div>
-                </div>
+        <div className="rounded-lg border border-primary/30 bg-primary/[0.06] p-2.5 flex flex-col items-center justify-center">
+          <span className="text-[0.65rem] font-mono uppercase text-primary">Agents</span>
+          <span className="text-xs font-semibold text-foreground mt-0.5">Monitor → Explainer</span>
+          <span className="text-[0.65rem] text-primary/80 mt-1">Ollama / LLM Reasoning</span>
+        </div>
 
-                {/* Right Col - Stats HUD */}
-                <div className="col-span-1 bg-black/60 p-8 flex flex-col justify-center gap-6 relative overflow-hidden backdrop-blur-md">
-                    {/* Background grid */}
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(0,212,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,212,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
-                    
-                    <div className="relative z-10 space-y-8">
-                        <div>
-                            <div className="flex justify-between items-end mb-2">
-                                <div className="flex items-center gap-2 text-primary/70 text-xs font-mono uppercase">
-                                    <BarChart3 size={14} /> Evaluation Metric
-                                </div>
-                                <span className="text-3xl font-bold font-headline text-white drop-shadow-[0_0_8px_rgba(0,212,255,0.8)]">87%</span>
-                            </div>
-                            <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-                                <motion.div 
-                                    initial={{ width: 0 }}
-                                    whileInView={{ width: '87%' }} 
-                                    transition={{ duration: 1.5, delay: 0.5, ease: "easeOut" }}
-                                    className="h-full bg-gradient-to-r from-primary/50 to-primary shadow-[0_0_10px_rgba(0,212,255,1)]"
-                                />
-                            </div>
-                            <div className="text-right mt-1 text-[10px] text-muted-foreground uppercase tracking-widest">Accuracy reached after 10,000 loops</div>
-                        </div>
-
-
-                        <div>
-                            <div className="flex justify-between items-end mb-2">
-                                <div className="flex items-center gap-2 text-green-400/70 text-xs font-mono uppercase">
-                                    <Zap size={14} /> Diagnostic Latency
-                                </div>
-                                <span className="text-3xl font-bold font-headline text-white drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]">&lt;2m</span>
-                            </div>
-                            <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-                                <motion.div 
-                                    initial={{ width: "100%" }}
-                                    whileInView={{ width: '20%' }} 
-                                    transition={{ duration: 1.5, delay: 0.9, ease: "easeOut" }}
-                                    className="h-full bg-gradient-to-r from-green-400/50 to-green-400 shadow-[0_0_10px_rgba(74,222,128,1)]"
-                                />
-                            </div>
-                            <div className="text-right mt-1 text-[10px] text-muted-foreground uppercase tracking-widest">Rapid Result Output</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Other Projects Grid */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
-        <h3 className="text-2xl font-headline font-bold text-white border-l-4 border-accent pl-4">Additional Architectures</h3>
-        <div className="flex flex-wrap gap-2">
-            {categories.map(cat => (
-                <button 
-                    key={cat} 
-                    onClick={() => setActiveCategory(cat)}
-                    className={`px-4 py-1.5 rounded-full text-xs font-mono tracking-widest transition-all ${activeCategory === cat ? 'bg-primary text-background shadow-[0_0_15px_rgba(0,212,255,0.4)]' : 'bg-primary/10 text-primary/70 hover:bg-primary/20 hover:text-primary'}`}
-                >
-                    {cat}
-                </button>
-            ))}
+        <div className="rounded-lg border border-white/10 bg-white/[0.03] p-2.5 flex flex-col items-center justify-center">
+          <span className="text-[0.65rem] font-mono uppercase text-muted-foreground">Output</span>
+          <span className="text-xs font-semibold text-foreground mt-0.5">FastAPI Advisory</span>
+          <span className="text-[0.65rem] text-emerald-400 mt-1">Zero Hallucination</span>
         </div>
       </div>
-      
-      <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative">
-          <AnimatePresence mode="popLayout">
-          {filteredProjects.map((project) => (
-             <motion.div
-                key={project.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.3 }}
-             >
-                <Card className="glass-card flex flex-col h-full bg-background/40 hover:bg-background/60 transition-colors border-white/5">
-                    <CardHeader className="p-5 pb-3">
-                        <CardTitle className="font-headline text-lg text-primary/90">{project.name}</CardTitle>
-                        <div className="flex flex-wrap gap-1.5 pt-2">
-                        {project.stats.map(stat => (
-                            <Badge key={stat.label} variant="secondary" className="text-[10px] bg-secondary/10 text-secondary border-none">{stat.value} {stat.label}</Badge>
-                        ))}
-                        </div>
-                    </CardHeader>
-                    <CardContent className="flex-grow p-5 pt-2">
-                        <p className="text-muted-foreground text-sm leading-relaxed">{project.description}</p>
-                        <div className="flex flex-wrap gap-1.5 pt-4">
-                        {project.tech.map(tech => (
-                            <span key={tech} className="text-[10px] font-mono text-white/40 uppercase tracking-widest bg-black/30 px-2 py-0.5 rounded">{tech}</span>
-                        ))}
-                        </div>
-                    </CardContent>
-                    <CardFooter className="flex gap-2 p-5 pt-0">
-                        {project.links.live && (
-                        <Button asChild size="sm" variant="ghost" className="hover:bg-primary/10 hover:text-primary pl-0">
-                            <a href={project.links.live} target="_blank" rel="noopener noreferrer">Live <ExternalLink className="ml-1.5 w-3 h-3" /></a>
-                        </Button>
-                        )}
-                        {project.links.github && (
-                        <Button variant="ghost" asChild size="sm" className="hover:bg-accent/10 hover:text-accent pl-0">
-                            <a href={project.links.github} target="_blank" rel="noopener noreferrer">GitHub <Github className="ml-1.5 w-3 h-3" /></a>
-                        </Button>
-                        )}
-                    </CardFooter>
-                </Card>
-             </motion.div>
-          ))}
-          </AnimatePresence>
+    </div>
+  );
+}
+
+function AutoTuningDiagram() {
+  return (
+    <div className="mt-6 rounded-xl border border-primary/20 bg-primary/[0.03] p-4 sm:p-5">
+      <div className="flex items-center justify-between border-b border-white/5 pb-2.5 mb-3.5">
+        <div className="flex items-center gap-2">
+          <Cpu className="h-4 w-4 text-primary" />
+          <span className="text-xs font-mono uppercase tracking-wider text-slate-300">
+            Vision Pipeline: Automated Fault Inspection
+          </span>
+        </div>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 font-mono text-[0.65rem] text-emerald-400 border border-emerald-500/20">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          92% mAP on 20+ Parts
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5 text-center">
+        <div className="rounded-lg border border-white/10 bg-white/[0.03] p-2.5 flex flex-col items-center justify-center">
+          <span className="text-[0.65rem] font-mono uppercase text-muted-foreground">Ingest</span>
+          <span className="text-xs font-semibold text-foreground mt-0.5">Component Imagery</span>
+          <span className="text-[0.65rem] text-slate-400 mt-1">Preprocessed Frames</span>
+        </div>
+
+        <div className="rounded-lg border border-primary/30 bg-primary/[0.06] p-2.5 flex flex-col items-center justify-center">
+          <span className="text-[0.65rem] font-mono uppercase text-primary">Inference</span>
+          <span className="text-xs font-semibold text-foreground mt-0.5">YOLO Segmentation</span>
+          <span className="text-[0.65rem] text-primary/80 mt-1">20+ Mechanical Parts</span>
+        </div>
+
+        <div className="rounded-lg border border-primary/30 bg-primary/[0.06] p-2.5 flex flex-col items-center justify-center">
+          <span className="text-[0.65rem] font-mono uppercase text-primary">Analysis</span>
+          <span className="text-xs font-semibold text-foreground mt-0.5">FastAPI & Node.js</span>
+          <span className="text-[0.65rem] text-primary/80 mt-1">&lt;2 Min Turnaround</span>
+        </div>
+
+        <div className="rounded-lg border border-white/10 bg-white/[0.03] p-2.5 flex flex-col items-center justify-center">
+          <span className="text-[0.65rem] font-mono uppercase text-muted-foreground">Deployment</span>
+          <span className="text-xs font-semibold text-foreground mt-0.5">Docker on AWS</span>
+          <span className="text-[0.65rem] text-emerald-400 mt-1">Diagnostic Dashboard</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ProjectsSection() {
+  const featuredProjects = projects.filter((p) => p.featured);
+  const otherProjects = projects.filter((p) => !p.featured);
+
+  return (
+    <section id="projects" className="relative z-10">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+      >
+        <p className="section-eyebrow">Work & Systems</p>
+        <h2 className="section-heading">Featured Projects</h2>
+        <p className="section-subheading">
+          Selected projects across AI, backend and full-stack.
+        </p>
       </motion.div>
+
+      {/* Featured Projects (Top 2 Full-Width Cards) */}
+      <div className="mt-12 space-y-8">
+        {featuredProjects.map((project, index) => (
+          <motion.div
+            key={project.id}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+          >
+            <Card className="glass-card--interactive overflow-hidden rounded-2xl border-border/80 p-6 sm:p-8 md:p-9">
+              {/* Header */}
+              <div className="flex flex-col justify-between gap-4 border-b border-border/40 pb-6 sm:flex-row sm:items-center">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-2.5 py-0.5 font-mono text-[0.72rem] font-medium text-primary border border-primary/25">
+                      <Sparkles className="h-3 w-3" />
+                      {project.badgeType}
+                    </span>
+                  </div>
+                  <h3 className="font-headline text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                    {project.name}
+                  </h3>
+                  <p className="text-sm font-medium text-slate-300 mt-1">
+                    {project.tagline}
+                  </p>
+                </div>
+
+                {/* Quick Link Buttons */}
+                <div className="flex items-center gap-2.5">
+                  {project.links.live && (
+                    <Button
+                      asChild
+                      size="sm"
+                      className="rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 shadow-sm"
+                    >
+                      <a href={project.links.live} target="_blank" rel="noopener noreferrer">
+                        Live Demo <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
+                      </a>
+                    </Button>
+                  )}
+                  {project.links.github && (
+                    <Button
+                      asChild
+                      size="sm"
+                      variant="outline"
+                      className="rounded-xl border-border bg-card/60 hover:bg-white/10"
+                    >
+                      <a href={project.links.github} target="_blank" rel="noopener noreferrer">
+                        Code <Github className="ml-1.5 h-3.5 w-3.5" />
+                      </a>
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Architecture Visual Diagram */}
+              {project.id === 'myfi-ai' && <MyFiDiagram />}
+              {project.id === 'autotuning-ai' && <AutoTuningDiagram />}
+
+              {/* 5/7 Column Layout: Problem vs What I Built */}
+              <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-12">
+                <div className="lg:col-span-5 rounded-xl border border-white/5 bg-white/[0.02] p-5 flex flex-col">
+                  <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-muted-foreground mb-2.5">
+                    <AlertCircle className="h-4 w-4 text-amber-400" />
+                    <span>Problem</span>
+                  </div>
+                  <p className="text-sm leading-relaxed text-slate-300 flex-grow">
+                    {project.problem}
+                  </p>
+                </div>
+
+                <div className="lg:col-span-7 rounded-xl border border-white/5 bg-white/[0.02] p-5 flex flex-col">
+                  <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-muted-foreground mb-2.5">
+                    <Zap className="h-4 w-4 text-sky-400" />
+                    <span>What I Built</span>
+                  </div>
+                  <p className="text-sm leading-relaxed text-slate-300 flex-grow">
+                    {project.built}
+                  </p>
+                </div>
+              </div>
+
+              {/* Highlights Outcome Callout */}
+              <div className="mt-6 rounded-xl border border-primary/20 bg-primary/[0.04] p-4 flex items-center gap-2.5">
+                <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-sky-400" />
+                <span className="text-xs font-mono uppercase tracking-wider text-primary font-semibold">
+                  Highlights:
+                </span>
+                <span className="text-xs sm:text-sm text-foreground">
+                  {project.highlights}
+                </span>
+              </div>
+
+              {/* Dedicated Row for Tech Tags */}
+              <div className="mt-4 pt-3 border-t border-border/30 flex flex-wrap items-center gap-1.5">
+                <span className="text-xs font-mono text-muted-foreground mr-1">Stack:</span>
+                {project.tech.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-md border border-white/10 bg-card/80 px-2.5 py-0.5 font-mono text-xs text-slate-300"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Additional Projects Section */}
+      <div className="mt-16 mb-6">
+        <h3 className="font-headline text-xl font-semibold text-foreground sm:text-2xl">
+          Additional Deployments & Prototypes
+        </h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Production systems, web platforms, and student assessment tools.
+        </p>
+      </div>
+
+      {/* Grid of Other Projects (2 on md, 2 on lg for clean alignment) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {otherProjects.map((project, index) => (
+          <motion.div
+            key={project.id}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: index * 0.08 }}
+            className="h-full"
+          >
+            <Card className="glass-card--interactive flex h-full flex-col justify-between rounded-2xl border-border/70 p-6">
+              <CardHeader className="p-0">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <span className="inline-block rounded-md bg-white/5 px-2 py-0.5 font-mono text-[0.68rem] text-primary mb-1.5 border border-white/10">
+                      {project.badgeType}
+                    </span>
+                    <h4 className="font-headline text-lg font-bold text-foreground">
+                      {project.name}
+                    </h4>
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-slate-300 leading-normal">
+                  {project.tagline}
+                </p>
+              </CardHeader>
+
+              <CardContent className="p-0 my-4 flex-grow space-y-3">
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {project.built}
+                </p>
+
+                <div className="rounded-lg border border-white/5 bg-white/[0.02] p-2.5">
+                  <span className="text-[0.7rem] font-mono uppercase text-primary font-medium block">
+                    Highlights
+                  </span>
+                  <p className="text-xs text-slate-300 mt-0.5">
+                    {project.highlights}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {project.tech.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-md border border-white/5 bg-white/5 px-2 py-0.5 font-mono text-[0.7rem] text-slate-300"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </CardContent>
+
+              <CardFooter className="p-0 pt-3 border-t border-border/30 flex items-center gap-2">
+                {project.links.live && (
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 px-2.5 text-xs text-primary hover:text-primary hover:bg-primary/10 rounded-lg"
+                  >
+                    <a href={project.links.live} target="_blank" rel="noopener noreferrer">
+                      Live Preview <ExternalLink className="ml-1 h-3 w-3" />
+                    </a>
+                  </Button>
+                )}
+                {project.links.github && (
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-lg"
+                  >
+                    <a href={project.links.github} target="_blank" rel="noopener noreferrer">
+                      GitHub <Github className="ml-1 h-3 w-3" />
+                    </a>
+                  </Button>
+                )}
+              </CardFooter>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
     </section>
   );
 }

@@ -1,64 +1,89 @@
 'use client';
 
 import React from 'react';
-import { motion, useInView } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { certifications } from '@/lib/data';
-import { BadgeCheck } from 'lucide-react';
+import { Cloud, ShieldCheck, BrainCircuit, ExternalLink, CheckCircle } from 'lucide-react';
+
+const providerIcons: Record<string, React.ElementType> = {
+  'AWS Certified AI Practitioner': Cloud,
+  'Microsoft Azure Fundamentals (AZ-900)': ShieldCheck,
+  'Machine Learning Certificate': BrainCircuit,
+};
 
 export function CertificationsSection() {
-  const ref = React.useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-200px' });
-
-  const containerVariants = {
-    hidden: {},
-    visible: {
-      transition: {
-        staggerChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: {
-        duration: 0.5,
-      },
-    },
-  };
-
   return (
-    <section id="certifications" ref={ref}>
-      <h2 className="section-heading">Certifications</h2>
-      <p className="section-subheading">
-        Continuously learning and validating my skills with industry-recognized credentials.
-      </p>
+    <section id="certifications" className="relative z-10">
       <motion.div
-        className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-        variants={containerVariants}
-        initial="hidden"
-        animate={isInView ? "visible" : "hidden"}
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
       >
-        {certifications.map((cert, index) => (
-          <motion.div key={index} variants={itemVariants}>
-            <Card className="glass-card group h-full overflow-hidden">
-              <CardContent className="p-6 text-center flex flex-col items-center justify-center h-full">
-                <div className="relative w-24 h-24 mb-4">
-                  {/* For simplicity, we'll use a generic icon. In a real project, you'd use cert.logo */}
-                  <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center">
-                    <BadgeCheck className="w-12 h-12 text-primary" />
-                  </div>
-                </div>
-                <h3 className="font-bold text-lg text-foreground">{cert.name}</h3>
-                <p className="text-muted-foreground text-sm mt-1">{cert.issuer}</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
+        <p className="section-eyebrow">Continuous Learning</p>
+        <h2 className="section-heading">Certifications & Proof</h2>
+        <p className="section-subheading">
+          Industry-recognized credentials in machine learning, generative AI, and cloud fundamentals.
+        </p>
       </motion.div>
+
+      <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+        {certifications.map((cert, index) => {
+          const Icon = providerIcons[cert.name] || BrainCircuit;
+          return (
+            <motion.div
+              key={cert.name}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              className="h-full"
+            >
+              <Card className="glass-card--interactive flex h-full flex-col justify-between rounded-2xl border-border/80 p-6 sm:p-7 text-center">
+                <CardContent className="p-0 flex flex-col items-center justify-between h-full">
+                  <div className="flex flex-col items-center">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/25 bg-primary/10 text-primary mb-4">
+                      <Icon className="h-7 w-7" />
+                    </div>
+                    <span className="rounded-md border border-white/10 bg-white/5 px-2.5 py-0.5 font-mono text-[0.68rem] text-primary mb-2">
+                      {cert.type}
+                    </span>
+                    <h3 className="font-headline text-lg font-bold text-foreground leading-snug">
+                      {cert.name}
+                    </h3>
+                    <div className="mt-2.5 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                      <CheckCircle className="h-3.5 w-3.5 text-emerald-400" />
+                      <span>{cert.issuer}</span>
+                      <span>•</span>
+                      <span>{cert.date}</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-border/30 w-full">
+                    <Button
+                      asChild
+                      size="sm"
+                      variant="ghost"
+                      className="w-full text-xs text-primary hover:text-primary hover:bg-primary/10 rounded-xl"
+                    >
+                      <a
+                        href={cert.credentialUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-1.5"
+                      >
+                        Verify Credential <ExternalLink className="h-3.5 w-3.5" />
+                      </a>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          );
+        })}
+      </div>
     </section>
   );
 }

@@ -1,14 +1,14 @@
 'use client';
 
-import { Github, Linkedin, Mail, ArrowUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Github, Linkedin, Mail, ArrowUp, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { socialLinks } from '@/lib/data';
-import React from 'react';
 
 export function Footer() {
-  const [year, setYear] = React.useState<number | null>(null);
+  const [year, setYear] = useState<number | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setYear(new Date().getFullYear());
   }, []);
 
@@ -20,42 +20,68 @@ export function Footer() {
   };
 
   return (
-    <footer className="bg-transparent w-full py-8 pb-32 relative z-10">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-        <div className="text-center md:text-left">
-          <p className="text-muted-foreground">
-            &copy; {year || ''} Siva Sudhamsh Gandikota. All rights reserved.
+    <footer className="w-full border-t border-border/40 bg-card/20 py-10 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-6">
+        <div className="text-center sm:text-left">
+          <p className="text-sm font-medium text-foreground">
+            &copy; {year || 2025} Siva Sudhamsh Gandikota. All rights reserved.
           </p>
-          <p className="text-sm text-muted-foreground/70">
-            Designed with 🚀, built with Next.js & Tailwind CSS.
+          <p className="text-xs text-muted-foreground mt-1">
+            Built with Next.js, Three.js & Tailwind CSS.
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <a href={socialLinks.github} target="_blank" rel="noopener noreferrer">
-            <Button variant="ghost" size="icon">
-              <Github className="h-5 w-5 hover:text-primary transition-colors" />
+
+        <div className="flex items-center gap-2">
+          <a
+            href="/resume.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Download Resume"
+          >
+            <Button variant="ghost" size="sm" className="h-9 px-3 rounded-xl hover:text-primary gap-1.5 text-xs text-slate-300">
+              <FileText className="h-3.5 w-3.5" />
+              Resume
             </Button>
           </a>
-          <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer">
-            <Button variant="ghost" size="icon">
-              <Linkedin className="h-5 w-5 hover:text-primary transition-colors" />
+          <a
+            href={socialLinks.github}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub Profile"
+          >
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:text-primary">
+              <Github className="h-4 w-4" />
             </Button>
           </a>
-          <a href={`mailto:${socialLinks.email}`}>
-            <Button variant="ghost" size="icon">
-              <Mail className="h-5 w-5 hover:text-primary transition-colors" />
+          <a
+            href={socialLinks.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="LinkedIn Profile"
+          >
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:text-primary">
+              <Linkedin className="h-4 w-4" />
             </Button>
           </a>
+          <a
+            href={`mailto:${socialLinks.email}`}
+            aria-label="Email Siva"
+          >
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:text-primary">
+              <Mail className="h-4 w-4" />
+            </Button>
+          </a>
+
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={scrollToTop}
+            aria-label="Back to top"
+            className="ml-2 h-9 w-9 rounded-xl border-border/80 hover:bg-white/10"
+          >
+            <ArrowUp className="h-4 w-4" />
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={scrollToTop}
-          className="group"
-        >
-          <ArrowUp className="h-5 w-5 group-hover:-translate-y-1 transition-transform" />
-          <span className="sr-only">Back to top</span>
-        </Button>
       </div>
     </footer>
   );

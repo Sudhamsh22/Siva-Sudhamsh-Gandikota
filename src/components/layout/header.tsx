@@ -1,132 +1,135 @@
 'use client';
 
-import { Home, User, Wrench, Briefcase, LayoutGrid, Mail } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Menu, X, FileText, ArrowUpRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { navLinks } from '@/lib/data';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { motion, useMotionValue, useSpring, useTransform, type MotionValue } from 'framer-motion';
-import React, { useRef } from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
 
-const iconMap: { [key: string]: React.ElementType } = {
-    'Home': Home,
-    'About': User,
-    'Skills': Wrench,
-    'Experience': Briefcase,
-    'Projects': LayoutGrid,
-    'Contact': Mail
-};
+export function Header() {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
+    setMobileMenuOpen(false);
     const element = document.querySelector(href);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
-};
-
-const DockItem = ({ mouseX, link }: { mouseX: MotionValue<number>, link: typeof navLinks[0] }) => {
-  const Icon = iconMap[link.label];
-  const ref = useRef<HTMLAnchorElement>(null);
-
-  const distance = useTransform(mouseX, (val: number) => {
-    const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
-    return val - bounds.x - bounds.width / 2;
-  });
-
-  // Adjust the range and magnification for a better feel
-  const widthSync = useTransform(distance, [-150, 0, 150], [56, 96, 56]);
-  // Tweak spring settings for less lag
-  const width = useSpring(widthSync, {
-    mass: 0.1,
-    stiffness: 200,
-    damping: 15,
-  });
+  };
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <motion.a
-          ref={ref}
-          style={{ width }}
-          href={link.href}
-          onClick={(e) => handleLinkClick(e, link.href)}
-          className="flex aspect-square items-center justify-center rounded-full text-muted-foreground transition-colors duration-300 hover:bg-primary/10 hover:text-primary"
-          aria-label={link.label}
-        >
-          {Icon && <Icon className="h-7 w-7" />}
-        </motion.a>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p>{link.label}</p>
-      </TooltipContent>
-    </Tooltip>
-  );
-};
+    <header
+      className={`fixed top-0 inset-x-0 z-40 transition-all duration-300 ${
+        isScrolled
+          ? 'bg-background/85 backdrop-blur-xl border-b border-border/60 shadow-lg shadow-black/20'
+          : 'bg-background/40 backdrop-blur-md border-b border-border/20'
+      }`}
+    >
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        {/* Left: Brand */}
+        <div className="flex items-center gap-3">
+          <a
+            href="#home"
+            onClick={(e) => handleLinkClick(e, '#home')}
+            className="group flex items-center gap-2.5 rounded-lg py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-label="Siva Sudhamsh Gandikota Home"
+          >
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-primary/30 bg-primary/10 font-mono text-xs font-bold text-primary transition-all duration-300 group-hover:border-primary group-hover:bg-primary/20">
+              SG
+            </span>
+            <span className="font-headline text-sm font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary sm:text-base">
+              Siva Sudhamsh Gandikota
+            </span>
+          </a>
 
+          <span className="hidden items-center gap-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-0.5 text-[0.65rem] font-mono text-emerald-400 md:inline-flex">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Open for Roles
+          </span>
+        </div>
 
-const MobileDock = () => {
-    return (
-        <nav className="flex items-end h-20 gap-2 rounded-full border border-primary/10 bg-card/50 p-2 shadow-lg backdrop-blur-lg">
-            {navLinks.map((link) => {
-                const Icon = iconMap[link.label];
-                return (
-                    <Tooltip key={link.href}>
-                        <TooltipTrigger asChild>
-                        <a
-                            href={link.href}
-                            onClick={(e) => handleLinkClick(e, link.href)}
-                            className="flex h-14 w-14 items-center justify-center rounded-full text-muted-foreground transition-all duration-300 hover:bg-primary/10 hover:text-primary"
-                            aria-label={link.label}
-                        >
-                            {Icon && <Icon className="h-7 w-7" />}
-                        </a>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                        <p>{link.label}</p>
-                        </TooltipContent>
-                    </Tooltip>
-                )
-            })}
-        </nav>
-    );
-};
-
-
-export function Header() {
-  const isMobile = useIsMobile();
-  const mouseX = useMotionValue(Infinity);
-  
-  // This helps prevent a flash of the desktop dock on mobile
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => setMounted(true), []);
-
-  if (!mounted) {
-    return null; // or a placeholder
-  }
-
-  if (isMobile) {
-    return (
-        <header className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
-            <TooltipProvider>
-                <MobileDock />
-            </TooltipProvider>
-        </header>
-    )
-  }
-
-  return (
-    <header className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
-      <TooltipProvider>
-        <motion.nav 
-          onMouseMove={(e) => mouseX.set(e.pageX)}
-          onMouseLeave={() => mouseX.set(Infinity)}
-          className="flex items-end h-20 gap-2 rounded-full border border-primary/10 bg-card/50 p-2 shadow-lg backdrop-blur-lg"
+        {/* Center: Desktop Navigation */}
+        <nav
+          aria-label="Main navigation"
+          className="hidden items-center gap-1 rounded-full border border-border/40 bg-card/40 px-3 py-1 backdrop-blur-lg md:flex"
         >
           {navLinks.map((link) => (
-            <DockItem key={link.href} mouseX={mouseX} link={link} />
+            <a
+              key={link.href}
+              href={link.href}
+              onClick={(e) => handleLinkClick(e, link.href)}
+              className="rounded-full px-3.5 py-1.5 text-xs font-medium text-muted-foreground transition-all duration-200 hover:text-foreground hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              {link.label}
+            </a>
           ))}
-        </motion.nav>
-      </TooltipProvider>
+        </nav>
+
+        {/* Right: Resume + Mobile Hamburger */}
+        <div className="flex items-center gap-2.5">
+          <Button
+            asChild
+            size="sm"
+            className="hidden sm:inline-flex rounded-xl bg-primary/15 border border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground font-medium text-xs h-9 px-4 transition-all duration-200 shadow-sm"
+          >
+            <a href="/resume.pdf" target="_blank" rel="noopener noreferrer">
+              <FileText className="mr-1.5 h-3.5 w-3.5" />
+              Resume
+              <ArrowUpRight className="ml-1 h-3.5 w-3.5 opacity-70" />
+            </a>
+          </Button>
+
+          {/* Mobile menu trigger */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-expanded={mobileMenuOpen}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border/50 bg-card/60 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary md:hidden"
+          >
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu Dropdown */}
+      {mobileMenuOpen && (
+        <div className="border-b border-border/60 bg-background/95 px-4 pb-6 pt-3 backdrop-blur-2xl md:hidden">
+          <nav className="flex flex-col gap-1.5">
+            {navLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                onClick={(e) => handleLinkClick(e, link.href)}
+                className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors"
+              >
+                {link.label}
+              </a>
+            ))}
+            <div className="pt-2">
+              <Button
+                asChild
+                className="w-full rounded-xl bg-primary text-primary-foreground font-medium text-xs h-10"
+              >
+                <a href="/resume.pdf" target="_blank" rel="noopener noreferrer">
+                  <FileText className="mr-2 h-4 w-4" />
+                  Download Resume
+                  <ArrowUpRight className="ml-1 h-4 w-4" />
+                </a>
+              </Button>
+            </div>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

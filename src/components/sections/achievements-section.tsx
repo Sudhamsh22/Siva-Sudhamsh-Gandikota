@@ -1,61 +1,61 @@
 'use client';
 
 import React from 'react';
-import { motion, useInView } from 'framer-motion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { motion } from 'framer-motion';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { leadershipAndAchievements } from '@/lib/data';
-import { Award, DollarSign, Presentation, Briefcase, Star } from 'lucide-react';
+import { Award, DollarSign, Presentation, Users, Sparkles } from 'lucide-react';
 
-const iconMap: { [key: string]: React.ElementType } = {
-  'Vice-President': Star,
-  '24-hour hackathon': Award,
-  'sponsorships secured': DollarSign,
-  'workshops conducted': Presentation,
-  'students placed': Briefcase,
-};
+const achievementIcons = [Award, Sparkles, DollarSign, Presentation];
 
 export function AchievementsSection() {
-  const ref = React.useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-200px' });
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: i * 0.15,
-        duration: 0.5,
-      },
-    }),
-  };
-
   return (
-    <section id="achievements" ref={ref}>
-      <h2 className="section-heading">Leadership & Achievements</h2>
-      <p className="section-subheading">
-        Beyond the code, I&apos;m passionate about building communities and fostering growth.
-      </p>
-      <div className="mt-16 grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {leadershipAndAchievements.map((achievement, index) => {
-          const Icon = iconMap[Object.keys(iconMap).find(key => achievement.title.includes(key)) || ''] || Star;
+    <section id="achievements" className="relative z-10">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+      >
+        <p className="section-eyebrow">Community & Impact</p>
+        <h2 className="section-heading">Leadership & Achievements</h2>
+        <p className="section-subheading">
+          Leading technical initiatives, organizing university hackathons, and mentoring aspiring developers.
+        </p>
+      </motion.div>
+
+      {/* 4 Cards Balanced Grid: 1 col on mobile, 2 cols on md, 4 cols on lg */}
+      <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {leadershipAndAchievements.map((item, index) => {
+          const Icon = achievementIcons[index % achievementIcons.length];
           return (
             <motion.div
-              key={index}
-              custom={index}
-              variants={cardVariants}
-              initial="hidden"
-              animate={isInView ? "visible" : "hidden"}
+              key={item.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: index * 0.08 }}
+              className="h-full"
             >
-              <Card className="glass-card h-full transform hover:-translate-y-2 transition-transform duration-300 hover:shadow-primary/20">
-                <CardHeader className="flex-row items-center gap-4">
-                  <div className="p-3 bg-primary/10 rounded-full">
-                    <Icon className="w-8 h-8 text-primary" />
+              <Card className="glass-card--interactive flex h-full flex-col justify-between rounded-2xl border-border/80 p-6">
+                <CardHeader className="p-0 pb-4">
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <span className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[0.68rem] text-primary">
+                      {item.organization}
+                    </span>
                   </div>
-                  <CardTitle className="font-headline text-xl">{achievement.title}</CardTitle>
+                  <h3 className="font-headline text-lg font-bold text-foreground leading-snug">
+                    {item.title}
+                  </h3>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{achievement.description}</p>
+
+                <CardContent className="p-0 pt-2 flex-grow">
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {item.description}
+                  </p>
                 </CardContent>
               </Card>
             </motion.div>

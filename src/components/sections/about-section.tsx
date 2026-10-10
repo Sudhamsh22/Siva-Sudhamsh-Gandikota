@@ -1,142 +1,168 @@
 'use client';
 
-import React, { useRef } from 'react';
-import Image from 'next/image';
-import { motion, useInView } from 'framer-motion';
-import { aboutData, achievements } from '@/lib/data';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { aboutData, educationData, aboutMetrics, currentlyBuilding } from '@/lib/data';
 import { Card, CardContent } from '@/components/ui/card';
-import { Target, Zap, Users, CheckCircle, TrendingUp, Cpu } from 'lucide-react';
+import { CheckCircle2, Target, Zap, Clock, GraduationCap, Award, Flame } from 'lucide-react';
+import { AnimatedCounter } from '@/components/ui/animated-counter';
 
-const iconMap = {
-  'ML Model Accuracy': Target,
-  'Concurrent Users': Users,
-  'Students Mentored': Zap,
-  'Performance Improvement': TrendingUp,
-};
-
-const AnimatedCounter = ({ value, text }: { value: number; text: string }) => {
-    const ref = useRef<HTMLSpanElement>(null);
-    const isInView = useInView(ref, { once: true, margin: "-100px" });
-    const [count, setCount] = React.useState(0);
-  
-    React.useEffect(() => {
-      if (isInView) {
-        let start = 0;
-        const end = value;
-        if (start === end) return;
-  
-        const duration = 2000;
-        const incrementTime = (duration / end);
-  
-        const timer = setInterval(() => {
-          start += 1;
-          setCount(start);
-          if (start === end) {
-            clearInterval(timer);
-          }
-        }, incrementTime);
-  
-        return () => clearInterval(timer);
-      }
-    }, [isInView, value]);
-  
-    return (
-        <span ref={ref}>
-          {count}
-          {text.includes('%') ? '%' : '+'}
-        </span>
-    );
-};
+const metricIcons = [Target, Clock, Zap, Award];
 
 export function AboutSection() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
-
-  const avatarImage = PlaceHolderImages.find(p => p.id === 'siva-avatar');
-
   return (
-    <section id="about" ref={ref} className="relative z-10 w-full max-w-7xl mx-auto px-4 py-24">
-      <div className="grid lg:grid-cols-2 gap-16 items-center">
-        
-        {/* Left Col - Bio */}
+    <section id="about" className="relative z-10">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+      >
+        <p className="section-eyebrow">Professional Profile</p>
+        <h2 className="section-heading">About Me</h2>
+        <p className="section-subheading">
+          A bit about how I work, what I build, and what I&apos;m looking for.
+        </p>
+      </motion.div>
+
+      <div className="mt-12 grid grid-cols-1 items-stretch gap-8 lg:grid-cols-12">
+        {/* Left Column: Summary & Focus */}
         <motion.div
-          className="glass-card shadow-[0_0_40px_rgba(0,0,0,0.5)] border-primary/20 bg-background/60 p-10 md:p-14 relative overflow-hidden"
-          initial={{ opacity: 0, x: -50 }}
-          animate={isInView ? { opacity: 1, x: 0 } : {}}
-          transition={{ duration: 0.7 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="flex flex-col justify-between lg:col-span-7"
         >
-          {/* Subtle bg glow */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
-          
-          <div className="flex items-center gap-3 mb-6">
-            <Cpu className="text-primary animate-pulse" />
-            <h2 className="text-3xl md:text-4xl font-headline font-bold text-white tracking-wide">About Me</h2>
+          <div className="glass-card flex h-full flex-col justify-between rounded-2xl p-6 sm:p-8 border-border/80">
+            <div>
+              <h3 className="font-headline text-xl font-bold text-foreground sm:text-2xl">
+                Bridging Machine Learning Research & Production Engineering
+              </h3>
+              <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+                {aboutData.summary}
+              </p>
+
+              <div className="mt-6 space-y-3.5">
+                {aboutData.bulletPoints.map((point, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3.5 transition-colors hover:bg-white/[0.05]"
+                  >
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" />
+                    <span className="text-sm leading-relaxed text-slate-300">
+                      {point}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Education Card embedded cleanly */}
+            <div className="mt-6 rounded-xl border border-white/5 bg-white/[0.03] p-4 sm:p-5">
+              <div className="flex items-start gap-3.5">
+                <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border border-primary/25 bg-primary/10 text-primary">
+                  <GraduationCap className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                    <h4 className="font-headline text-sm sm:text-base font-bold text-foreground">
+                      {educationData.institution}
+                    </h4>
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {educationData.period}
+                    </span>
+                  </div>
+                  <p className="text-xs sm:text-sm text-primary font-medium mt-0.5">
+                    {educationData.degree}
+                  </p>
+                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-primary/20 bg-primary/10 px-2 py-0.5 font-mono text-[0.7rem] font-semibold text-primary">
+                    <span>CGPA: {educationData.cgpa}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            {aboutData.summary}
-          </p>
-          <ul className="mt-8 space-y-4">
-            {(aboutData.bulletPoints as string[]).map((point, index) => (
-              <li key={index} className="flex items-start gap-4 p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                <CheckCircle className="w-5 h-5 text-accent mt-0.5 flex-shrink-0" />
-                <span className="text-gray-300 font-light">{point}</span>
-              </li>
-            ))}
-          </ul>
         </motion.div>
 
-        {/* Right Col - Visuals & Stats */}
+        {/* Right Column: Key Metrics Grid (Aligned Height) */}
         <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="flex flex-col items-center lg:items-end w-full"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:col-span-5 h-full"
         >
-           {/* Avatar Area */}
-           {avatarImage && (
-             <div className="relative mb-12 flex justify-center w-full">
-              {/* Decorative Rings */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 border border-primary/20 rounded-full animate-[spin_10s_linear_infinite]"></div>
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 border border-dashed border-accent/20 rounded-full animate-[spin_15s_linear_infinite_reverse]"></div>
-              
-              <Image
-                src={avatarImage.imageUrl}
-                alt={avatarImage.description}
-                data-ai-hint={avatarImage.imageHint}
-                width={220}
-                height={220}
-                className="relative z-10 rounded-full border-[4px] border-background shadow-[0_0_30px_rgba(0,212,255,0.4)] object-cover"
-              />
-              </div>
-            )}
+          {aboutMetrics.map((item, index) => {
+            const Icon = metricIcons[index] || Target;
+            return (
+              <Card
+                key={item.context}
+                className="glass-card--interactive flex flex-col justify-between p-6 rounded-2xl border-border/80 h-full"
+              >
+                <CardContent className="p-0 flex flex-col justify-between h-full">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="rounded-xl bg-primary/10 p-2.5 text-primary border border-primary/20">
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      <span className="text-[0.7rem] font-medium text-slate-400">
+                        {item.label}
+                      </span>
+                    </div>
+                  </div>
 
-          {/* Achievement Grid */}
-          <div className="grid grid-cols-2 gap-4 w-full">
-            {achievements.slice(0, 4).map((achievement, index) => {
-              const Icon = iconMap[achievement.label as keyof typeof iconMap] || Target;
-              // Alternate border glow for visual interest
-              const glowColor = index % 2 === 0 ? "border-primary/30" : "border-accent/30";
-              const textColor = index % 2 === 0 ? "text-primary" : "text-accent";
-
-              return (
-                <Card key={index} className={`glass-card bg-black/40 p-6 flex flex-col items-center justify-center border ${glowColor} hover:bg-white/5 transition-all`}>
-                  <CardContent className="p-0 text-center">
-                    <Icon className={`w-8 h-8 mx-auto mb-3 ${textColor} opacity-80`} />
-                    <h4 className={`text-4xl font-bold font-headline mb-1 drop-shadow-md ${textColor}`}>
-                        <AnimatedCounter value={achievement.value} text={achievement.label} />
-                    </h4>
-                    <p className="text-[11px] font-mono uppercase tracking-widest text-muted-foreground opacity-70">
-                        {achievement.label.replace(/\d+%/g, '').trim()}
+                  <div className="mt-6">
+                    <div className="font-headline text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
+                      <AnimatedCounter value={item.value} />
+                      <span className="text-primary">{item.suffix}</span>
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground font-medium leading-snug">
+                      {item.context}
                     </p>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </motion.div>
       </div>
+
+      {/* Currently Building Strip (Part 6.6) */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="mt-10 rounded-2xl border border-primary/20 bg-primary/[0.03] p-5 sm:p-6"
+      >
+        <div className="flex items-center gap-2 mb-4">
+          <Flame className="h-4 w-4 text-primary animate-pulse" />
+          <span className="font-mono text-xs uppercase tracking-wider text-primary font-semibold">
+            Now / Currently Building
+          </span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {currentlyBuilding.map((item) => (
+            <div
+              key={item.title}
+              className="rounded-xl border border-white/5 bg-white/[0.02] p-4 flex flex-col justify-between"
+            >
+              <div>
+                <span className="inline-block rounded-md bg-white/5 px-2 py-0.5 font-mono text-[0.68rem] text-primary mb-1.5 border border-white/10">
+                  {item.tag}
+                </span>
+                <h4 className="font-headline text-sm font-bold text-foreground">
+                  {item.title}
+                </h4>
+                <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                  {item.description}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </motion.div>
     </section>
   );
 }
