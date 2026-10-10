@@ -5,17 +5,13 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
   ArrowDown,
-  Download,
-  Github,
-  Linkedin,
-  Mail,
   Sparkles,
   CheckCircle2,
   MapPin,
   Cpu,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { heroData, socialLinks } from '@/lib/data';
+import { heroData } from '@/lib/data';
 
 export function HeroSection() {
   const scrollToProjects = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -84,7 +80,7 @@ export function HeroSection() {
             ))}
           </div>
 
-          {/* Two Call to Action Buttons */}
+          {/* Call to Action Button */}
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <Button
               asChild
@@ -96,50 +92,6 @@ export function HeroSection() {
                 <ArrowDown className="ml-2 h-4 w-4" />
               </a>
             </Button>
-
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="rounded-xl border-border bg-card/60 px-6 font-semibold text-foreground transition-all duration-300 hover:bg-white/10 hover:border-primary/50 hover:-translate-y-0.5"
-            >
-              <a href="/resume.pdf" target="_blank" rel="noopener noreferrer">
-                Download resume
-                <Download className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
-          </div>
-
-          {/* Quick Social & Direct Contact Links */}
-          <div className="mt-8 flex flex-wrap items-center gap-6 border-t border-border/40 pt-6">
-            <span className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
-              Connect:
-            </span>
-            <a
-              href={socialLinks.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md px-1 py-0.5"
-            >
-              <Github className="h-4 w-4 transition-transform group-hover:scale-110" />
-              <span>GitHub</span>
-            </a>
-            <a
-              href={socialLinks.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md px-1 py-0.5"
-            >
-              <Linkedin className="h-4 w-4 transition-transform group-hover:scale-110" />
-              <span>LinkedIn</span>
-            </a>
-            <a
-              href={`mailto:${socialLinks.email}`}
-              className="group flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md px-1 py-0.5"
-            >
-              <Mail className="h-4 w-4 transition-transform group-hover:scale-110" />
-              <span>Email</span>
-            </a>
           </div>
         </motion.div>
 
