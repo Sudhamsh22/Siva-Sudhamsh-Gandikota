@@ -23,7 +23,7 @@ export const heroData = {
   summary:
     "Computer Science undergraduate specializing in Artificial Intelligence with hands-on experience building reliable backend, full-stack, ML, and GenAI systems.",
   location: "Hyderabad, India",
-  availabilityBadge: "B.Tech CSE (AI) • GRIET • Class of 2027 • Available for Internships",
+  availabilityBadge: "B.Tech CSE (AI) • GRIET  ",
   metrics: [
     {
       value: "92%",
@@ -333,7 +333,7 @@ export const leadershipAndAchievements = [
       "Pitched and secured strategic sponsorships from industry partners to fund developer prizes, hardware tracks, and student software initiatives.",
   },
   {
-    title: "Technical Workshops Conductor",
+    title: "Technical Workshops Organizer",
     category: "Community Mentorship",
     organization: "6 Hands-on Sessions",
     description:
